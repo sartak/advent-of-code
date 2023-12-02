@@ -2,44 +2,36 @@ use anyhow::Result;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/02.txt")?;
-    let mut games = vec![];
 
-    let red = 12;
-    let green = 13;
-    let blue = 14;
+    let sum: i64 = input
+        .lines()
+        .filter_map(|line| {
+            let (game, rounds) = line.split_once(": ").unwrap();
+            let (_, game) = game.split_once(' ').unwrap();
+            let id: i64 = game.parse().unwrap();
 
-    for line in input.lines() {
-        let (game, gems) = line.split_once(": ").unwrap();
-        let (_, game) = game.split_once(' ').unwrap();
-        let game: i64 = game.parse().unwrap();
+            for round in rounds.split("; ") {
+                for gem in round.split(", ") {
+                    let (count, color) = gem.split_once(' ').unwrap();
+                    let limit = match color {
+                        "red" => 12,
+                        "green" => 13,
+                        "blue" => 14,
+                        _ => unreachable!(),
+                    };
 
-        let mut pos = true;
-        let hands = gems.split("; ");
-        for hand in hands {
-            let gems = hand.split(", ");
-            for gem in gems {
-                let (count, color) = gem.split_once(' ').unwrap();
-                let limit = match color {
-                    "red" => red,
-                    "green" => green,
-                    "blue" => blue,
-                    _ => unreachable!(),
-                };
-
-                let count: i64 = count.parse().unwrap();
-                if count > limit {
-                    pos = false;
+                    let count: i64 = count.parse().unwrap();
+                    if count > limit {
+                        return None;
+                    }
                 }
             }
-        }
 
-        if pos {
-            games.push(game);
-        }
-    }
+            Some(id)
+        })
+        .sum();
 
-    let res: i64 = games.into_iter().sum();
+    println!("{sum}");
 
-    println!("{res}");
     Ok(())
 }
