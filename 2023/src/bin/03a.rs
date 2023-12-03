@@ -1,60 +1,51 @@
 use anyhow::Result;
 use itertools::Itertools;
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/03.txt")?;
+    let input = input.lines().collect_vec();
     let rx = Regex::new(r"[0-9]+")?;
-    let mut s: i64 = 0;
-    let input = input
-        .lines()
-        .map(|l| (l, l.chars().collect_vec()))
-        .collect_vec();
-    let mut symbols = HashMap::new();
 
-    for (y, (_, chars)) in input.iter().enumerate() {
-        for (x, c) in chars.iter().enumerate() {
-            if c.is_ascii_digit() || *c == '.' {
-                continue;
-            }
-            symbols.insert((x, y), *c);
-        }
-    }
-
-    for (y, (line, _)) in input.iter().enumerate() {
-        for m in rx.captures_iter(line) {
-            let cap = m.get(0).unwrap();
-            let x0 = cap.start() as i64;
-            let num = cap.as_str();
-            let x1 = (cap.start() + num.len()) as i64;
-            let num = num.parse::<i64>().unwrap();
-            let mut ok = false;
-
-            let y = y as i64;
-            for yy in (y - 1)..=(y + 1) {
-                if yy < 0 {
-                    continue;
+    let symbols = input
+        .iter()
+        .enumerate()
+        .flat_map(|(y, line)| {
+            line.chars().enumerate().filter_map(move |(x, c)| {
+                if c.is_ascii_digit() || c == '.' {
+                    None
+                } else {
+                    Some((x, y))
                 }
-                let yy = yy as usize;
+            })
+        })
+        .collect::<HashSet<_>>();
 
-                for xx in (x0 - 1)..=x1 {
-                    if xx < 0 {
-                        continue;
+    let sum = input
+        .into_iter()
+        .enumerate()
+        .map(|(y, line)| {
+            rx.find_iter(line)
+                .filter_map(|res| {
+                    let num = res.as_str();
+                    let x0 = res.start();
+                    let x1 = x0 + num.len();
+                    let num = num.parse::<usize>().unwrap();
+
+                    if (x0.saturating_sub(1)..=x1)
+                        .cartesian_product(y.saturating_sub(1)..=(y + 1))
+                        .any(|(x, y)| symbols.contains(&(x, y)))
+                    {
+                        Some(num)
+                    } else {
+                        None
                     }
-                    let xx = xx as usize;
-                    if symbols.contains_key(&(xx, yy)) {
-                        ok = true;
-                    }
-                }
-            }
+                })
+                .sum::<usize>()
+        })
+        .sum::<usize>();
 
-            if ok {
-                s += num;
-            }
-        }
-    }
-
-    println!("{s}");
+    println!("{sum}");
     Ok(())
 }
