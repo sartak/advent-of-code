@@ -1,38 +1,34 @@
 use anyhow::Result;
-use itertools::Itertools;
+use std::collections::HashSet;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/04.txt")?;
-    let input = input.lines().collect_vec();
-    let mut cards = (0..input.len()).collect_vec();
-    let mut s = 0;
-    while let Some(n) = cards.pop() {
-        s += 1;
-        let (_, nums) = input[n].split_once(": ").unwrap();
-        let (winners, have) = nums.split_once(" | ").unwrap();
-        let winners = winners
-            .split_whitespace()
-            .map(|n| n.parse::<i64>().unwrap())
-            .collect_vec();
-        let have = have
-            .split_whitespace()
-            .map(|n| n.parse::<i64>().unwrap())
-            .collect_vec();
+    let input = input.lines().collect::<Vec<_>>();
 
-        let mut w = 0;
-        for n in have {
-            if winners.contains(&n) {
-                w += 1;
+    let mut cards = vec![1; input.len()];
+
+    input
+        .into_iter()
+        .map(|card| {
+            let (_, nums) = card.split_once(':').unwrap();
+            let (winners, have) = nums.split_once('|').unwrap();
+            have.split_whitespace()
+                .collect::<HashSet<_>>()
+                .intersection(&winners.split_whitespace().collect::<HashSet<_>>())
+                .count()
+        })
+        .enumerate()
+        .for_each(|(i, sprawl)| {
+            let copies = cards[i];
+            for j in 1..=sprawl {
+                if let Some(card) = cards.get_mut(i + j) {
+                    *card += copies;
+                }
             }
-        }
+        });
 
-        for i in (n + 1)..=(n + w) {
-            if i < input.len() {
-                cards.push(i);
-            }
-        }
-    }
+    let count: usize = cards.into_iter().sum();
+    println!("{count}");
 
-    println!("{s}");
     Ok(())
 }

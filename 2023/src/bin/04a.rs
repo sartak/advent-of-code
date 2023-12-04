@@ -1,34 +1,24 @@
 use anyhow::Result;
-use itertools::Itertools;
+use std::collections::HashSet;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/04.txt")?;
-    let mut s: i64 = 0;
 
-    for line in input.lines() {
-        let (_, nums) = line.split_once(": ").unwrap();
-        let (winners, have) = nums.split_once(" | ").unwrap();
-        let winners = winners
-            .split_whitespace()
-            .map(|n| n.parse::<i64>().unwrap())
-            .collect_vec();
-        let have = have
-            .split_whitespace()
-            .map(|n| n.parse::<i64>().unwrap())
-            .collect_vec();
+    let sum: u64 = input
+        .lines()
+        .map(|card| {
+            let (_, nums) = card.split_once(':').unwrap();
+            let (winners, have) = nums.split_once('|').unwrap();
+            let count = have
+                .split_whitespace()
+                .collect::<HashSet<_>>()
+                .intersection(&winners.split_whitespace().collect::<HashSet<_>>())
+                .count();
 
-        let mut w = 0;
-        for n in have {
-            if winners.contains(&n) {
-                w += 1;
-            }
-        }
+            1 << (count - 1)
+        })
+        .sum();
 
-        if w > 0 {
-            s += (2i64).pow(w - 1);
-        }
-    }
-
-    println!("{s}");
+    println!("{sum}");
     Ok(())
 }
