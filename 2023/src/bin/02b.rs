@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::cmp::max;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/02.txt")?;
@@ -16,11 +15,11 @@ fn main() -> Result<()> {
             for round in rounds.split("; ") {
                 for gem in round.split(", ") {
                     let (count, color) = gem.split_once(' ').unwrap();
-                    let count: i64 = count.parse().unwrap();
+                    let count = count.parse().unwrap();
                     match color {
-                        "red" => red = max(red, count),
-                        "green" => green = max(green, count),
-                        "blue" => blue = max(blue, count),
+                        "red" => red = red.max(count),
+                        "green" => green = green.max(count),
+                        "blue" => blue = blue.max(count),
                         _ => unreachable!(),
                     };
                 }
