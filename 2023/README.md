@@ -16,6 +16,12 @@ Part 1 was a nightmare. I kept getting the example correct, but failing on the r
 
 Part 1 was quick and easy. Part 2 I ended up with an exponential solution (maintain a queue of card IDs to process; I could have at least cached the score of each card…). I had a working solution at 00:07:31 (which would have put me somewhere between rank 101-200), but it took too long to run so I assumed I hit an infinite loop. I faffed around for a bit, ran a release build (which still took 5 seconds), and got the star at 14 mins. (I'm much happier with the much better time complexity of my tidied solution.)
 
+# Day 5
+
+Part 1 was okay. A little overcomplicated perhaps. If needed I could have trivally extended my solution to handle multiple branching paths. Unfortunately that was not the direction part 2 went.
+
+Part 2 was brutal. Learning from my lesson yesterday, I left the naive solution running in the background for a while, but they wouldn't let me get away with that this time. It took me about three minutes to restructure the code to support ranges, but then I spent nearly all the two hours writing and debugging the range intersection code. I was able to simplify the problem by handling only one segment of the range (the beginning) at a time, but that still left 8 branches to debug. So many off-by-one errors. Unlike day 3 though, I never really felt frustrated. The problem was wrapping my head around the range logic, rather than having some unknown bug somewhere with no great debugging tools. So, even though it took me far longer to solve, I greatly preferred today over day 3.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -24,3 +30,4 @@ Part 1 was quick and easy. Part 2 I ended up with an exponential solution (maint
 | 2   | 00:04:49 | 156     | 00:09:14 | 392     |
 | 3   | 01:15:13 | 8424    | 01:20:21 | 5998    |
 | 4   | 00:03:43 | 268     | 00:14:04 | 979     |
+| 5   | 00:22:20 | 1703    | 02:21:06 | 5161    |
