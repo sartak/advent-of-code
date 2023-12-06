@@ -24,6 +24,11 @@ Part 2 was brutal. Learning from my lesson yesterday, I left the naive solution 
 
 Unlike day 3, I never really felt frustrated. The problem was wrapping my head around the range logic, rather than having some unknown bug somewhere with no great debugging tools. So, even though it took me far longer to solve, I greatly preferred today over day 3.
 
+# Day 6
+
+A nice breath of fresh air. I would have submitted part 1 at about 6 mins in,
+but the puzzle input refused to load. For part 2 I just manually edited the input file rather than change the code.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -33,3 +38,4 @@ Unlike day 3, I never really felt frustrated. The problem was wrapping my head a
 | 3   | 01:15:13 | 8424    | 01:20:21 | 5998    |
 | 4   | 00:03:43 | 268     | 00:14:04 | 979     |
 | 5   | 00:22:20 | 1703    | 02:21:06 | 5161    |
+| 6   | 00:08:24 | 1896    | 00:08:49 | 807     |
