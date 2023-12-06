@@ -1,37 +1,32 @@
 use anyhow::Result;
+use itertools::Itertools;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/06.txt")?;
     let mut lines = input.lines();
 
-    let times = lines
-        .next()
-        .unwrap()
-        .split_once(':')
-        .unwrap()
-        .1
-        .split_whitespace()
-        .map(|n| n.parse::<i64>().unwrap());
-
-    let dist = lines
-        .next()
-        .unwrap()
-        .split_once(':')
-        .unwrap()
-        .1
-        .split_whitespace()
-        .map(|n| n.parse::<i64>().unwrap());
-
-    let s: usize = times
-        .zip(dist)
-        .map(|(t, d)| {
-            (0..=t)
-                .map(|hold| (t - hold) * hold)
-                .filter(|&n| n > d)
+    let count = [lines.next(), lines.next()]
+        .into_iter()
+        .map(|line| {
+            line.unwrap()
+                .split_once(':')
+                .unwrap()
+                .1
+                .split_whitespace()
+                .join("")
+                .parse::<usize>()
+                .unwrap()
+        })
+        .tuples()
+        .map(|(time, best)| {
+            (0..=time)
+                .map(|hold| (time - hold) * hold)
+                .filter(|&dist| dist > best)
                 .count()
         })
-        .product();
+        .next()
+        .unwrap();
 
-    println!("{s}");
+    println!("{count}");
     Ok(())
 }
