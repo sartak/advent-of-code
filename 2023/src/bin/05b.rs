@@ -1,6 +1,7 @@
 use anyhow::Result;
 use itertools::Itertools;
 use maplit::hashmap as map;
+use rangemap::RangeMap;
 use regex::Regex;
 use std::collections::HashMap;
 
@@ -13,7 +14,7 @@ fn main() -> Result<()> {
     let mut source = String::from("");
     let mut dest = String::from("");
 
-    let mut conversions: HashMap<String, HashMap<String, Vec<(i64, i64, i64)>>> = HashMap::new();
+    let mut conversions: HashMap<String, HashMap<String, RangeMap<_, _>>> = HashMap::new();
 
     for line in lines.iter() {
         if seeds.is_empty() {
@@ -22,6 +23,7 @@ fn main() -> Result<()> {
                 .split_whitespace()
                 .map(|n| n.parse::<i64>().unwrap())
                 .tuples::<(_, _)>()
+                .map(|(start, len)| start..(start + len))
                 .collect_vec();
         } else if let Some(caps) = rx.captures(line) {
             source = caps.get(1).unwrap().as_str().to_string();
@@ -33,81 +35,49 @@ fn main() -> Result<()> {
                 .split_whitespace()
                 .map(|n| n.parse::<i64>().unwrap())
                 .collect_vec();
-            let ds = v.get(0).unwrap();
-            let sr = v.get(1).unwrap();
-            let rl = v.get(2).unwrap();
+            let ds = *v.get(0).unwrap();
+            let sr = *v.get(1).unwrap();
+            let rl = *v.get(2).unwrap();
+            let range = sr..(sr + rl);
+            let offset = ds - sr;
 
-            let n = (*sr, *ds, *rl);
             conversions
                 .entry(source.clone())
                 .and_modify(|d| {
                     d.entry(dest.clone())
-                        .and_modify(|v| {
-                            v.push(n);
-                            v.sort();
+                        .and_modify(|r| {
+                            r.insert(range.clone(), offset);
                         })
-                        .or_insert(vec![n]);
+                        .or_insert([(range.clone(), offset)].into_iter().collect());
                 })
                 .or_insert({
-                    map! { dest.clone() => vec![n] }
+                    map! { dest.clone() => [(range, offset)].into_iter().collect() }
                 });
         }
     }
 
     let mut lowest: Option<i64> = None;
-    for (start, len) in seeds {
-        let mut queue = vec![(String::from("seed"), start, len)];
-        while let Some((key, start, len)) = queue.pop() {
+    for seed in seeds {
+        let mut queue = vec![(String::from("seed"), seed)];
+        while let Some((key, range)) = queue.pop() {
             if key == "location" {
                 if let Some(l) = lowest {
-                    if start < l {
-                        lowest = Some(start);
+                    if range.start < l {
+                        lowest = Some(range.start);
                     }
                 } else {
-                    lowest = Some(start);
+                    lowest = Some(range.start);
                 }
             } else {
                 let next = conversions.get(&key).unwrap();
-                let kv = next.iter().next().unwrap();
-                let nk = kv.0;
-                let vs = kv.1;
-                let mut vi = 0;
-
-                while let Some(&(sr, ds, rl)) = vs.get(vi) {
-                    let map = ds - sr;
-                    if start < sr {
-                        if start + len < sr {
-                            queue.push((nk.clone(), start, len));
-                        } else {
-                            let front = sr - start;
-                            let back = len - front;
-                            queue.push((nk.clone(), start, front));
-                            queue.push((key.clone(), sr, back));
-                        }
-                        break;
-                    } else if start == sr {
-                        if len <= rl {
-                            queue.push((nk.clone(), start + map, len));
-                        } else {
-                            queue.push((nk.clone(), start + map, rl));
-                            queue.push((key.clone(), start + rl, len - rl));
-                        }
-                        break;
-                    } else if start >= sr + rl {
-                        vi += 1;
-                        if vs.get(vi).is_none() {
-                            queue.push((nk.clone(), start, len));
-                        }
-                    } else {
-                        if start + len < sr + rl {
-                            queue.push((nk.clone(), start + map, len));
-                        } else {
-                            let nl = sr + rl - start;
-                            queue.push((nk.clone(), start + map, nl));
-                            queue.push((key.clone(), start + nl, len - nl));
-                        }
-                        break;
-                    }
+                let (nk, ranges) = next.iter().next().unwrap();
+                for gap in ranges.gaps(&range) {
+                    queue.push((nk.clone(), gap));
+                }
+                for (overlap, offset) in ranges.overlapping(&range) {
+                    let start = overlap.start.max(range.start) + offset;
+                    let end = overlap.end.min(range.end) + offset;
+                    queue.push((nk.clone(), start..end));
                 }
             }
         }
