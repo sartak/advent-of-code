@@ -1,90 +1,68 @@
 use anyhow::Result;
 use itertools::Itertools;
-use maplit::hashmap as map;
 use rangemap::RangeMap;
-use regex::Regex;
-use std::collections::HashMap;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/05.txt")?;
-    let lines = input.lines().collect_vec();
-    let rx = Regex::new(r"^(\w+)-to-(\w+) map:")?;
+    let mut lines = input.lines();
 
-    let mut seeds = Vec::new();
-    let mut source = String::from("");
-    let mut dest = String::from("");
+    let seeds = lines
+        .next()
+        .unwrap()
+        .split_once(':')
+        .unwrap()
+        .1
+        .split_whitespace()
+        .map(|s| s.parse::<i64>().unwrap())
+        .tuples()
+        .map(|(start, len)| start..(start + len))
+        .collect_vec();
 
-    let mut conversions: HashMap<String, HashMap<String, RangeMap<_, _>>> = HashMap::new();
+    let _empty = lines.next();
 
-    for line in lines.iter() {
-        if seeds.is_empty() {
-            let (_, s) = line.split_once(": ").unwrap();
-            seeds = s
-                .split_whitespace()
-                .map(|n| n.parse::<i64>().unwrap())
-                .tuples::<(_, _)>()
-                .map(|(start, len)| start..(start + len))
-                .collect_vec();
-        } else if let Some(caps) = rx.captures(line) {
-            source = caps.get(1).unwrap().as_str().to_string();
-            dest = caps.get(2).unwrap().as_str().to_string();
-        } else if line.is_empty() {
-            // skip
-        } else {
-            let v = line
-                .split_whitespace()
-                .map(|n| n.parse::<i64>().unwrap())
-                .collect_vec();
-            let ds = *v.get(0).unwrap();
-            let sr = *v.get(1).unwrap();
-            let rl = *v.get(2).unwrap();
-            let range = sr..(sr + rl);
-            let offset = ds - sr;
+    let min = lines
+        .batching(|lines| {
+            let _header = lines.next();
 
-            conversions
-                .entry(source.clone())
-                .and_modify(|d| {
-                    d.entry(dest.clone())
-                        .and_modify(|r| {
-                            r.insert(range.clone(), offset);
-                        })
-                        .or_insert([(range.clone(), offset)].into_iter().collect());
+            let transform = lines
+                .take_while(|line| !line.is_empty())
+                .map(|line| {
+                    let (dest, source, len) = line
+                        .split_whitespace()
+                        .map(|n| n.parse::<i64>().unwrap())
+                        .tuples()
+                        .next()
+                        .unwrap();
+                    (source..(source + len), dest - source)
                 })
-                .or_insert({
-                    map! { dest.clone() => [(range, offset)].into_iter().collect() }
-                });
-        }
-    }
-
-    let mut lowest: Option<i64> = None;
-    for seed in seeds {
-        let mut queue = vec![(String::from("seed"), seed)];
-        while let Some((key, range)) = queue.pop() {
-            if key == "location" {
-                if let Some(l) = lowest {
-                    if range.start < l {
-                        lowest = Some(range.start);
-                    }
-                } else {
-                    lowest = Some(range.start);
-                }
+                .collect::<RangeMap<_, _>>();
+            if transform.is_empty() {
+                None
             } else {
-                let next = conversions.get(&key).unwrap();
-                let (nk, ranges) = next.iter().next().unwrap();
-                for gap in ranges.gaps(&range) {
-                    queue.push((nk.clone(), gap));
-                }
-                for (overlap, offset) in ranges.overlapping(&range) {
-                    let start = overlap.start.max(range.start) + offset;
-                    let end = overlap.end.min(range.end) + offset;
-                    queue.push((nk.clone(), start..end));
-                }
+                Some(transform)
             }
-        }
-    }
+        })
+        .fold(seeds, |nums, transform| {
+            nums.into_iter()
+                .flat_map(|range| {
+                    transform
+                        .overlapping(&range)
+                        .map(|(overlap, offset)| {
+                            let start = overlap.start.max(range.start) + offset;
+                            let end = overlap.end.min(range.end) + offset;
+                            start..end
+                        })
+                        .chain(transform.gaps(&range))
+                        .collect_vec()
+                })
+                .collect_vec()
+        })
+        .into_iter()
+        .map(|range| range.start)
+        .min()
+        .unwrap();
 
-    let lowest = lowest.unwrap();
-    println!("{lowest}");
+    println!("{min}");
 
     Ok(())
 }
