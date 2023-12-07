@@ -29,6 +29,16 @@ Unlike day 3, I never really felt frustrated. The problem was wrapping my head a
 A nice breath of fresh air. I would have submitted part 1 at about 6 mins in,
 but the puzzle input refused to load. For part 2 I just manually edited the input file rather than change the code.
 
+# Day 7
+
+I solved part 1 with regex, though I missed an edge case where a full-house
+could be 22333 _or_ 22233. I also sorted the hands backwards which produced a
+result of 6640 rather than 6440, which I'd misread as correct.
+
+Part 2 I tried to make the regex work but it was awful. So instead I switched to a low-tech approach: counting cards, taking out the jacks, then looking at the two most frequent ranks. I hit a snag though where in my editor I used "undo" too many times, which reverted my change that pushed `J` to the back of the rank order. Of course the example intentionally didn't flag that.
+
+I feel like I could have taken half the time on both parts, but I'm not too fussed. Happy that Rust sorts tuples correctly.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -39,3 +49,4 @@ but the puzzle input refused to load. For part 2 I just manually edited the inpu
 | 4   | 00:03:43 | 268     | 00:14:04 | 979     |
 | 5   | 00:22:20 | 1703    | 02:21:06 | 5161    |
 | 6   | 00:08:24 | 1896    | 00:08:49 | 807     |
+| 7   | 00:24:38 | 1544    | 00:38:23 | 1573    |
