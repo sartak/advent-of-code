@@ -1,9 +1,19 @@
-use anyhow::Result;
-use itertools::Itertools;
 use std::collections::HashMap;
+
+use anyhow::Result;
+use fancy_regex::Regex;
+use itertools::Itertools;
 
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/07.txt")?;
+
+    let five = Regex::new(r"(.)\1\1\1\1")?;
+    let four = Regex::new(r"(.)\1\1\1")?;
+    let fullhouse = Regex::new(r"(.)\1\1(.)\2|(.)\3(.)\4\4")?;
+    let three = Regex::new(r"(.)\1\1")?;
+    let twopair = Regex::new(r"(.)\1.?(.)\2")?;
+    let onepair = Regex::new(r"(.)\1")?;
+    let kinds = [&five, &four, &fullhouse, &three, &twopair, &onepair];
 
     let ranks = "AKQJT98765432"
         .chars()
@@ -16,6 +26,7 @@ fn main() -> Result<()> {
         .map(|line| {
             let (hand, bid) = line.split_once(' ').unwrap();
             let bid = bid.parse::<usize>().unwrap();
+
             let hand = hand.chars().collect_vec();
 
             let order = hand
@@ -23,19 +34,19 @@ fn main() -> Result<()> {
                 .map(|card| ranks.get(card).unwrap())
                 .collect_vec();
 
-            let mut counts = hand.iter().counts().into_values().sorted().rev();
-            let top = counts.next().unwrap_or(0);
-            let second = counts.next().unwrap_or(0);
+            let hand = hand.into_iter().sorted().join("");
 
-            let score = match (top, second) {
-                (5, _) => 0,
-                (4, _) => 1,
-                (3, 2) => 2,
-                (3, _) => 3,
-                (2, 2) => 4,
-                (2, _) => 5,
-                (_, _) => 6,
-            };
+            let score = kinds
+                .into_iter()
+                .enumerate()
+                .find_map(|(i, rx)| {
+                    if rx.is_match(&hand).unwrap() {
+                        Some(i)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(6);
 
             (score, order, bid)
         })

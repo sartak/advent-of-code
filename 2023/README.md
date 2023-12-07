@@ -35,9 +35,9 @@ I solved part 1 with regex, though I missed an edge case where a full-house
 could be 22333 _or_ 22233. I also sorted the hands backwards which produced a
 result of 6640 rather than 6440, which I'd misread as correct.
 
-Part 2 I tried to make the regex work but it was awful. So instead I switched to a low-tech approach: counting cards, taking out the jacks, then looking at the two most frequent ranks. I hit a snag though where in my editor I used "undo" too many times, which reverted my change that pushed `J` to the back of the rank order. Of course the example intentionally didn't flag that.
+In Part 2, I tried to account for jokers directly in the regex, but it was awful. So I dropped that, though the next day I realized I could have kept the regex by first finding the most common card _n_ then string-replaced each `J` with _n_. I switched to a low-tech approach: count cards, take out the jacks, then look at the two most frequent ranks. I hit a snag though where in my editor I used "undo" too many times, which reverted my change that pushed `J` to the back of the rank order. The example (intentionally) didn't flag that error.
 
-I feel like I could have taken half the time on both parts, but I'm not too fussed. Happy that Rust sorts tuples correctly.
+I feel like I could have taken half the time on both parts, but I'm not too fussed. Happy that Rust sorts (even nested) tuples correctly.
 
 # Results
 
