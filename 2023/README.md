@@ -39,6 +39,14 @@ In Part 2, I tried to account for jokers directly in the regex, but it was awful
 
 I feel like I could have taken half the time on both parts, but I'm not too fussed. Happy that Rust sorts (even nested) tuples correctly.
 
+# Day 8
+
+Part 1 went quickly and smoothly. I was particularly happy to recall the iterator [cycle](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.cycle) method.
+
+For part 2, I let the brute force version run in the background while I looked for a better solution. My first approach was to precalculate the distance from each origin to each other node it can reach. Then iterate steps 1..infinity checking if any path length divides cleanly for all origins. Then while implementing that, I realized I'm reinventing least-common-multiple, poorly. I started down the path of finding the LCM of each distinct (origin, destination) path. But then when I debug-printed out the intermediate, results I saw that each origin reached only one destination, which is a vast simplification. I plugged the 6 path lengths into Wolfram Alpha with LCM to get the answer. After submitting I implemented the simplified version of the problem.
+
+Insert rant here about how I'm feeling punished for solving the general problem statement rather than the specific input set they gave.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -50,3 +58,4 @@ I feel like I could have taken half the time on both parts, but I'm not too fuss
 | 5   | 00:22:20 | 1703    | 02:21:06 | 5161    |
 | 6   | 00:08:24 | 1896    | 00:08:49 | 807     |
 | 7   | 00:24:38 | 1544    | 00:38:23 | 1573    |
+| 8   | 00:04:53 | 365     | 00:32:41 | 1974    |
