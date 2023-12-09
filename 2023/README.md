@@ -47,6 +47,10 @@ For part 2, I let the brute force version run in the background while I looked f
 
 Insert rant here about how I'm feeling punished for solving the general problem statement rather than the specific input set they gave.
 
+# Day 9
+
+Can't complain too much. It went a little slower than I would have liked, mostly due to the sleep deprivation caused by the past week of midnight programming puzzles.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -59,3 +63,4 @@ Insert rant here about how I'm feeling punished for solving the general problem 
 | 6   | 00:08:24 | 1896    | 00:08:49 | 807     |
 | 7   | 00:24:38 | 1544    | 00:38:23 | 1573    |
 | 8   | 00:04:53 | 365     | 00:32:41 | 1974    |
+| 9   | 00:09:13 | 1067    | 00:15:16 | 1539    |
