@@ -51,6 +51,18 @@ Insert rant here about how I'm feeling punished for solving the general problem 
 
 Can't complain too much. It went a little slower than I would have liked, mostly due to the sleep deprivation caused by the past week of midnight programming puzzles.
 
+# Day 10
+
+Part 1 wasn't too bad; was nice to write a breadth-first search. It's my first time this year reaching for an intermediate representation (an `Option<Pipe>` enum with values `NE`, `SE`, `Start`, etc). Which was probably worth it only in as much as it made part 2 less messy. Getting through part 1 just took a bunch of work.
+
+In Part 2, it felt like smooth sailing. Add another loop at the end that starts at each unvisited `.`, floodfill, then mark the whole set as enclosed or not (depending on whether a map edge was touched). I'm glad I realized from the drop that I didn't have to do anything more sophisticated. I had most of the examples solved about 20 minutes into part 2. So I optimistically submitted my answer, and of course it was wrong.
+
+Then I saw the squeeze requirement. What a doozy. This took me nearly an hour to implement on its own. I started by cleaning up my solution (e.g. updating the starting cell's pipe type rather than lazily figuring it out, switching from an `Option<Pipe>` representation to just a `Pipe` with `Dot` and `Gap` arms, etc). Then I doubled the size of the map, reconnecting pipes where needed. (I briefly considered doubling the size of the map using vim but I still would have needed to reconnect the pipes, and it wouldn't generalize to the other examples)
+
+I left some todos in both parts where my input didn't require enumerating, say, every single possible starting pipe. But today was another first: building a debug view:
+
+![Debug view](misc/10.png)
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -64,3 +76,4 @@ Can't complain too much. It went a little slower than I would have liked, mostly
 | 7   | 00:24:38 | 1544    | 00:38:23 | 1573    |
 | 8   | 00:04:53 | 365     | 00:32:41 | 1974    |
 | 9   | 00:09:13 | 1067    | 00:15:16 | 1539    |
+| 10  | 00:36:36 | 1966    | 01:56:16 | 2403    |
