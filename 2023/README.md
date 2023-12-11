@@ -63,6 +63,10 @@ I left some todos in both parts where my input didn't require enumerating, say, 
 
 ![Debug view](misc/10.png)
 
+# Day 11
+
+Not too bad on either part. While reading through I was very concerned I'd have to reify an actual graph and run Dijkstra's on it, but no, summing all pairs paths was just `abs(y1 - y0) + abs(x1 - x0)`. I also was happy that storing coordinates in a HashMap was the way to go (with the value being star index to dedupe paths). I was slightly punished for actually reshaping the map in part 1, but sometimes that's just the hand you're dealt. Luckily part 2 was amenable to iterating over all each row and column.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -77,3 +81,4 @@ I left some todos in both parts where my input didn't require enumerating, say, 
 | 8   | 00:04:53 | 365     | 00:32:41 | 1974    |
 | 9   | 00:09:13 | 1067    | 00:15:16 | 1539    |
 | 10  | 00:36:36 | 1966    | 01:56:16 | 2403    |
+| 11  | 00:15:16 | 1239    | 00:21:22 | 1111    |
