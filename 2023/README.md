@@ -67,6 +67,12 @@ I left some todos in both parts where my input didn't require enumerating, say, 
 
 Not too bad on either part. While reading through I was very concerned I'd have to reify an actual graph and run Dijkstra's on it, but no, summing all pairs paths was just `abs(y1 - y0) + abs(x1 - x0)`. I also was happy that storing coordinates in a HashMap was the way to go (with the value being star index to dedupe paths). I was slightly punished for actually reshaping the map in part 1, but sometimes that's just the hand you're dealt. Luckily part 2 was amenable to iterating over all each row and column.
 
+# Day 12
+
+Part 1 started off smoothly enough. I constructed a regex using the lengths, so for example `1,3,2` would get transformed into `/^\.*#\.+###\.+##\.*$/`. I iterated over all possible diagrams (filling in `.` or `#` for each `?`), counting the regex matches.
+
+That certainly did not scale to part 2. It was immediately obvious that iterating over all possible diagrams would take forever. The only thing that came to mind was a recursive solution that was aggressive about cutting the solution space. But there are an awful lot of cases to handle just right. I chunked the inputs by splitting on `.`, then used `dedup_with_count` to get a list of `(count, is_known)` pairs, which was a little easier to work with. The necessary fiddling was reminiscent of the range splitting I did in day 5. Luckily this time I had an oracle to guide me: my solution to part 1. Quite a few times I ran the input through both solutions, diffed their outputs, then picked one of the differences to debug. Then once both answers were consistent, I multiplied the inputs by 5 as part 2 asked, compiled in release build, and... the answers came back slowly. But I suspected this was going to happen, so I'd written my recursive function to be memoizable. With that, my answer popped out in significantly under a second. Adding parallelism was a one line change (`.into_iter()` -> `.into_par_iter()`) and sped up my solution by 3-4x.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -82,3 +88,4 @@ Not too bad on either part. While reading through I was very concerned I'd have 
 | 9   | 00:09:13 | 1067    | 00:15:16 | 1539    |
 | 10  | 00:36:36 | 1966    | 01:56:16 | 2403    |
 | 11  | 00:15:16 | 1239    | 00:21:22 | 1111    |
+| 12  | 00:14:46 | 436     | 03:16:53 | 3384    |
