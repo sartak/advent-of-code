@@ -73,6 +73,12 @@ Part 1 started off smoothly enough. I constructed a regex using the lengths, so 
 
 That certainly did not scale to part 2. It was immediately obvious that iterating over all possible diagrams would take forever. The only thing that came to mind was a recursive solution that was aggressive about cutting the solution space. But there are an awful lot of cases to handle just right. I chunked the inputs by splitting on `.`, then used `dedup_with_count` to get a list of `(count, is_known)` pairs, which was a little easier to work with. The necessary fiddling was reminiscent of the range splitting I did in day 5. Luckily this time I had an oracle to guide me: my solution to part 1. Quite a few times I ran the input through both solutions, diffed their outputs, then picked one of the differences to debug. Then once both answers were consistent, I multiplied the inputs by 5 as part 2 asked, compiled in release build, and... the answers came back slowly. But I suspected this was going to happen, so I'd written my recursive function to be memoizable. With that, my answer popped out in significantly under a second. Adding parallelism was a one line change (`.into_iter()` -> `.into_par_iter()`) and sped up my solution by 3-4x.
 
+# Day 13
+
+Solving part 1 took longer than it should have. In particular figuring out the formula for what the reflected coordinate would be. But I solved it without too much fuss. Just, slowly.
+
+Was really hoping for an easy day. While reading the problem I was concerned that part 2 would be a beast, but no, it was very straightforward. I just kept a `smudge` flag, set it on the first error (and bailed on the second error), and made sure it was true at the end of the loop. So I was happy to submit that in under two minutes.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -89,3 +95,4 @@ That certainly did not scale to part 2. It was immediately obvious that iteratin
 | 10  | 00:36:36 | 1966    | 01:56:16 | 2403    |
 | 11  | 00:15:16 | 1239    | 00:21:22 | 1111    |
 | 12  | 00:14:46 | 436     | 03:16:53 | 3384    |
+| 13  | 00:30:13 | 2175    | 00:31:36 | 1074    |
