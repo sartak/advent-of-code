@@ -79,6 +79,12 @@ Solving part 1 took longer than it should have. In particular figuring out the f
 
 Was really hoping for an easy day. While reading the problem I was concerned that part 2 would be a beast, but no, it was very straightforward. I just kept a `smudge` flag, set it on the first error (and bailed on the second error), and made sure it was true at the end of the loop. So I was happy to submit that in under two minutes.
 
+# Day 14
+
+This was the smoothest any problem has gone so far (as evidenced by my current best rank). In part 1 I didn't feel like figuring out a smart way to know when rocks were done rolling, so I just did one iteration of moving all boulders up by one, then stopping the outer loop when nothing changed. I figured it'd burn me in part 2 but it didn't.
+
+For part 2 I did the dumbest possible thing for rolling in each direction: copy-paste the code four times, and adjust the deltas. I made up for that with a quick insight into how to avoid doing a billion iterations though. I realized that the pattern must repeat pretty quickly (and indeed it does: in my input, after the 150th cycle, it reverts back to cycle 108). I found that by hashing the map after each cycle (well, specifically just the position of each `O` to cut down on calculation time). Then, once we've found the repeat, we can advance the cycle counter quickly without having to simulate the rolling. I'm sure smarter folks than I just used modular arithmetic here, but I didn't want to have to fret about off-by-one errors. So instead I just enter a hot loop where I add `150-108` to the cycle count until I'm about to hit the 1 billion mark. Then I resume the normal simulations. This whole rube goldberg device runs in about 400ms; Rust my beloved.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -96,3 +102,4 @@ Was really hoping for an easy day. While reading the problem I was concerned tha
 | 11  | 00:15:16 | 1239    | 00:21:22 | 1111    |
 | 12  | 00:14:46 | 436     | 03:16:53 | 3384    |
 | 13  | 00:30:13 | 2175    | 00:31:36 | 1074    |
+| 14  | 00:09:03 | 943     | 00:22:12 | 241     |
