@@ -90,6 +90,10 @@ For part 2 I did the dumbest possible thing for rolling in each direction: copy-
 Pretty smooth. Part 2 required a bunch of fiddly reading comprehension, but I'm
 glad it didn't involve probing or other sophisticated hash table mechanics.
 
+# Day 16
+
+I felt like it was smooth (though I had one typo in part 1, and I didn't handle the first cell correctly which of course mattered), but I didn't place as highly as I expected. I used a hashset of beam x, y, dir to avoid infinite loops. For part 2 I structured my answer such that I could trivially enable parallelism, but before I started to `par_iter()`, my debug build came back with an answer in 3 seconds. As usual I was happy with Rust's enum and match, which made managing beam direction quite fluent.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -109,3 +113,4 @@ glad it didn't involve probing or other sophisticated hash table mechanics.
 | 13  | 00:30:13 | 2175    | 00:31:36 | 1074    |
 | 14  | 00:09:03 | 943     | 00:22:12 | 241     |
 | 15  | 00:04:33 | 992     | 00:19:11 | 816     |
+| 16  | 00:18:56 | 559     | 00:26:00 | 632     |
