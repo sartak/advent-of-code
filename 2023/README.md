@@ -94,6 +94,12 @@ glad it didn't involve probing or other sophisticated hash table mechanics.
 
 I felt like it was smooth (though I had one typo in part 1, and I didn't handle the first cell correctly which of course mattered), but I didn't place as highly as I expected. I used a hashset of beam x, y, dir to avoid infinite loops. For part 2 I structured my answer such that I could trivially enable parallelism, but before I started to `par_iter()`, my debug build came back with an answer in 3 seconds. As usual I was happy with Rust's enum and match, which made managing beam direction quite fluent.
 
+# Day 17
+
+Very chuffed about part 1, I was about under two minutes away from getting points. I used a min-heap, with a memoizing hashset on `(x, y, dir, consecutive)`. Then for part 2 I was particularly excited, because my solution generalized very nicely.
+
+But, it wasn't meant to be. I spent an hour and a half debugging what I can't believe ended up being the problem: the "a minimum of four blocks in that direction before it can turn (or even before it can stop at the end)" aside. _Removing_ the conditional that `consecutive >= 4` to be able to stop is what actually _solved_ it for me. Which also breaks the second example. I'm still baffled. My only guess is I must have a second bug somewhere else.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -114,3 +120,4 @@ I felt like it was smooth (though I had one typo in part 1, and I didn't handle 
 | 14  | 00:09:03 | 943     | 00:22:12 | 241     |
 | 15  | 00:04:33 | 992     | 00:19:11 | 816     |
 | 16  | 00:18:56 | 559     | 00:26:00 | 632     |
+| 17  | 00:15:57 | 138     | 01:42:11 | 1885    |
