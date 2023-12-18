@@ -100,6 +100,18 @@ Very chuffed about part 1, I was about under two minutes away from getting point
 
 But, it wasn't meant to be. I spent an hour and a half debugging what I can't believe ended up being the problem: the "a minimum of four blocks in that direction before it can turn (or even before it can stop at the end)" aside. _Removing_ the conditional that `consecutive >= 4` to be able to stop is what actually _solved_ it for me. Which also breaks the second example. I'm still baffled. My only guess is I must have a second bug somewhere else.
 
+# Day 18
+
+Happy with how both parts went! For part 1, I first determined the size of the grid in my input (it was just shy of 256x256), since I didn't want to have to dynamically resize. I hit a couple snags with ranges (like trying to iterate over `0..-6` which Rust doesn't let you do). At the end I floodfilled by starting at `(0, 0)` (which I knew was empty since I'd already made sure the grid was oversized), then summed up everything I hadn't touched. Once I confirmed the example was working, the submission went through immediately.
+
+For part 2, I remembered the shoelace formula (to easily find the area of an arbitrary polygon) from having looked at other solutions of day 10, which was the pipes puzzle. This was the first time I had to do some googling during the solve. But, after some finagling, including …
+
+- an 8 minute, very-ill-considered sorting of the edges by their polar coordinates (give me a break, it was well after my bedtime)
+- getting suspiciously close to, but below, the right answer on the example, which made me quickly realize I need to separately add in the perimeter
+- ending up with an off-by-one error, which a quick `ans += 1` took care of (for both the example and the input!)
+
+… I eventually got it to work with an acceptable amount of fuss.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -121,3 +133,4 @@ But, it wasn't meant to be. I spent an hour and a half debugging what I can't be
 | 15  | 00:04:33 | 992     | 00:19:11 | 816     |
 | 16  | 00:18:56 | 559     | 00:26:00 | 632     |
 | 17  | 00:15:57 | 138     | 01:42:11 | 1885    |
+| 18  | 00:18:26 | 662     | 00:42:02 | 657     |
