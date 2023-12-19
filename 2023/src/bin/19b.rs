@@ -1,6 +1,5 @@
 use anyhow::Result;
 use itertools::Itertools;
-use rayon::prelude::*;
 use regex::Regex;
 use std::collections::{HashMap, VecDeque};
 
@@ -71,6 +70,20 @@ fn new_cut(cut: &Cut, var: &str, op: &str, val: u64) -> Cut {
     }
 }
 
+fn score(cut: &Cut) -> u64 {
+    let Cut {
+        xmin,
+        xmax,
+        mmin,
+        mmax,
+        amin,
+        amax,
+        smin,
+        smax,
+    } = cut;
+    (xmax - xmin + 1) * (mmax - mmin + 1) * (amax - amin + 1) * (smax - smin + 1)
+}
+
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/19.txt")?;
     let mut lines = input.lines();
@@ -120,7 +133,6 @@ fn main() -> Result<()> {
         workflows.insert(name, rules);
     }
 
-    let mut accepts = vec![];
     let mut queue = VecDeque::new();
     queue.push_back((
         "in",
@@ -136,6 +148,7 @@ fn main() -> Result<()> {
         },
     ));
 
+    let mut ans = 0;
     while let Some((name, mut cut)) = queue.pop_front() {
         let Some(rules) = workflows.get(name) else {
             panic!()
@@ -147,12 +160,12 @@ fn main() -> Result<()> {
                     break;
                 }
                 (None, Accept) => {
-                    accepts.push(cut.clone());
+                    ans += score(&cut);
                     break;
                 }
                 (Some((var, op, val)), Accept) => {
                     let new = new_cut(&cut, var, op, *val);
-                    accepts.push(new);
+                    ans += score(&new);
 
                     cut = anti_cut(&cut, var, op, *val);
                 }
@@ -172,90 +185,6 @@ fn main() -> Result<()> {
             }
         }
     }
-
-    let mut xx = Vec::new();
-    let mut mm = Vec::new();
-    let mut aa = Vec::new();
-    let mut ss = Vec::new();
-
-    for cut in accepts.iter() {
-        let Cut {
-            xmin,
-            xmax,
-            mmin,
-            mmax,
-            amin,
-            amax,
-            smin,
-            smax,
-        } = *cut;
-        assert!(xmin <= xmax);
-        assert!(mmin <= mmax);
-        assert!(amin <= amax);
-        assert!(smin <= smax);
-
-        xx.push(xmin);
-        xx.push(xmax + 1);
-
-        mm.push(mmin);
-        mm.push(mmax + 1);
-
-        aa.push(amin);
-        aa.push(amax + 1);
-
-        ss.push(smin);
-        ss.push(smax + 1);
-    }
-
-    xx = xx.into_iter().sorted().unique().collect_vec();
-    mm = mm.into_iter().sorted().unique().collect_vec();
-    aa = aa.into_iter().sorted().unique().collect_vec();
-    ss = ss.into_iter().sorted().unique().collect_vec();
-
-    let ans: u64 = xx
-        .par_iter()
-        .enumerate()
-        .map(|(i, &x0)| {
-            let Some(&x1) = xx.get(i + 1) else { return 0 };
-            let mut sum = 0;
-            for (&m0, &m1) in mm.iter().tuple_windows() {
-                for (&a0, &a1) in aa.iter().tuple_windows() {
-                    's: for (&s0, &s1) in ss.iter().tuple_windows() {
-                        for cut in &accepts {
-                            let Cut {
-                                xmin,
-                                xmax,
-                                mmin,
-                                mmax,
-                                amin,
-                                amax,
-                                smin,
-                                smax,
-                            } = *cut;
-                            if x0 >= xmin
-                                && x1 <= xmax + 1
-                                && m0 >= mmin
-                                && m1 <= mmax + 1
-                                && a0 >= amin
-                                && a1 <= amax + 1
-                                && s0 >= smin
-                                && s1 <= smax + 1
-                            {
-                                let x = x1 - x0;
-                                let m = m1 - m0;
-                                let a = a1 - a0;
-                                let s = s1 - s0;
-                                let combo = x * m * a * s;
-                                sum += combo;
-                                continue 's;
-                            }
-                        }
-                    }
-                }
-            }
-            sum
-        })
-        .sum();
 
     println!("{ans}");
     Ok(())
