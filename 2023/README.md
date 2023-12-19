@@ -112,6 +112,20 @@ For part 2, I remembered the shoelace formula (to easily find the area of an arb
 
 … I eventually got it to work with an acceptable amount of fuss.
 
+# Day 19
+
+Part 1 went well enough. Really finding new appreciation for how expressive Rust is.
+
+Part 2 took about three times longer than it should have, ultimately due to a bug in the range splits. I only took the "positive" side; in in a rule like `a{x>100:b,A}` I forgot to cut out the `x>100` from the accepted path, and so it allowed the full range. Whoops. Took hours to spot that bug.
+
+My approach was to enumerate all possible paths through the workflows, shrinking min and max. That left me with a list of possible ranges, each of which can multiply together to form a count of combinations. But, because I way-overcounted due to the bug, it baffled me how to combine them sensibly. It looked like the answer would necessarily just be 4000^4, which it is obviously not. I needed a way to avoid over- or under-counting the possible combinations. I struggled for a while to find the right way to think about this problem. I googled for how to find the union volume of overlapping hypercubes, though didn't end up. The naive approach of iterating over each possible x, m, a, s was intentionally not feasible. But then it dawned on me that I could iterate over _just_ the interesting ranges: the values of x, m, a, and s that appear in any path, sorted and deduplicated. Then check if that set of ranges is valid for any path. This was still a large solution space, about 200^4 \* 500, but just barely brute-forceable. And it made me confident that I wouldn't miscount combinations.
+
+But every answer I got was way off. So after much gnashing, I finally resigned that my bug must be in the range splitting, which I'd until this point felt pretty good about. I did some testing with manually-crafted inputs, which pointed to the "anti-cut" bug. Fixed that up, which gave me results close to, but not exactly, the answer. A few off-by-one fiddling later and I had it. I then ran the and it looked like it was going to take about a half an hour. A couple lines of [rayon](https://docs.rs/rayon/latest/rayon/) later and I got the star after about 6 minutes of brrrr.
+
+![btop](misc/19.png)
+
+The next morning my wife told me I woke her up with an exclamation when I'd finally gotten the answer. I also deleted a quarter of the code (everything that I'd written between hour 1 and 3), added a few lines, and the runtime went from minutes to milliseconds. If I hadn't had the anti-cut bug I would've gone to bed much earlier.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -134,3 +148,4 @@ For part 2, I remembered the shoelace formula (to easily find the area of an arb
 | 16  | 00:18:56 | 559     | 00:26:00 | 632     |
 | 17  | 00:15:57 | 138     | 01:42:11 | 1885    |
 | 18  | 00:18:26 | 662     | 00:42:02 | 657     |
+| 19  | 00:22:59 | 979     | 02:57:02 | 3454    |
