@@ -1,11 +1,10 @@
 use anyhow::Result;
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 
-#[derive(Debug)]
-enum Module {
-    FlipFlop,
-    Conjunction,
+enum Module<'a> {
+    FlipFlop(bool),
+    Conjunction(HashMap<&'a str, bool>),
     Broadcaster,
 }
 use Module::*;
@@ -13,109 +12,76 @@ use Module::*;
 fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/20.txt")?;
 
-    let mut modules = HashMap::new();
+    let mut modules: HashMap<&str, (Module, Vec<&str>)> = input
+        .lines()
+        .map(|line| {
+            let (module, targets) = line.split_once(" -> ").unwrap();
 
-    for line in input.lines() {
-        let (module, targets) = line.split_once(" -> ").unwrap();
-
-        let (name, module) = if let Some(module) = module.strip_prefix('&') {
-            (module, Conjunction)
-        } else if let Some(module) = module.strip_prefix('%') {
-            (module, FlipFlop)
-        } else if module == "broadcaster" {
-            (module, Broadcaster)
-        } else {
-            panic!();
-        };
-
-        let targets = targets.split(", ").map(String::from).collect_vec();
-
-        let name = String::from(name);
-
-        modules.insert(name.clone(), (module, targets));
-    }
-
-    let mut memory = HashMap::new();
-    for (name, (_, targets)) in modules.iter() {
-        for target in targets.iter() {
-            let Some((Conjunction, _)) = modules.get(target) else {
-                continue;
+            let (name, module) = if let Some(name) = module.strip_prefix('&') {
+                (name, Conjunction(HashMap::new()))
+            } else if let Some(name) = module.strip_prefix('%') {
+                (name, FlipFlop(false))
+            } else if module == "broadcaster" {
+                (module, Broadcaster)
+            } else {
+                panic!("invalid module {module}");
             };
 
-            memory
-                .entry(target)
-                .and_modify(|v: &mut HashMap<&String, bool>| {
-                    v.insert(name, false);
-                })
-                .or_insert_with(|| {
-                    let mut m = HashMap::new();
-                    m.insert(name, false);
-                    m
-                });
-        }
+            let targets = targets.split(", ").collect_vec();
+            (name, (module, targets))
+        })
+        .collect();
+
+    for (name, upstreams) in modules
+        .iter()
+        .flat_map(|(name, (_, targets))| {
+            targets.iter().filter_map(|&target| {
+                matches!(modules.get(target), Some((Conjunction(_), _))).then_some((target, *name))
+            })
+        })
+        .into_group_map()
+    {
+        let Some((Conjunction(memory), _)) = modules.get_mut(name) else {
+            unreachable!()
+        };
+        memory.extend(upstreams.into_iter().map(|name| (name, false)));
     }
 
-    let mut is_high = HashSet::new();
-    let mut ans_lo = 0;
-    let mut ans_hi = 0;
-
+    let (mut ans_lo, mut ans_hi) = (0, 0);
     for _ in 0..1000 {
-        let origin = String::from("broadcaster");
         let mut queue = VecDeque::new();
-        queue.push_back((origin.clone(), origin, false));
-        ans_lo += 1;
+        queue.push_back(("button", "broadcaster", false));
 
         while let Some((from, name, pulse)) = queue.pop_front() {
-            let Some((module, targets)) = modules.get(&name) else {
+            if pulse {
+                ans_hi += 1;
+            } else {
+                ans_lo += 1;
+            }
+
+            let Some((module, targets)) = modules.get_mut(name) else {
                 continue;
             };
 
-            match module {
-                FlipFlop => {
-                    if !pulse {
-                        let emit = if is_high.contains(&name) {
-                            is_high.remove(&name);
-                            false
-                        } else {
-                            is_high.insert(name.clone());
-                            true
-                        };
-                        for target in targets {
-                            if emit {
-                                ans_hi += 1;
-                            } else {
-                                ans_lo += 1;
-                            }
-                            queue.push_back((name.clone(), target.to_owned(), emit));
-                        }
+            let pulse = match module {
+                FlipFlop(state) => {
+                    if pulse {
+                        continue;
                     }
+                    *state = !*state;
+                    *state
                 }
-                Conjunction => {
-                    let memory = memory.get_mut(&name).unwrap();
-                    let cell = memory.get_mut(&from).unwrap();
+                Conjunction(memory) => {
+                    let cell = memory.get_mut(from).unwrap();
                     *cell = pulse;
-                    let emit = !memory.values().all(|&v| v);
-                    for target in targets {
-                        if emit {
-                            ans_hi += 1;
-                        } else {
-                            ans_lo += 1;
-                        }
-                        queue.push_back((name.clone(), target.to_owned(), emit));
-                    }
+                    !memory.values().all(|&v| v)
                 }
-                Broadcaster => {
-                    let emit = pulse;
-                    for target in targets {
-                        if emit {
-                            ans_hi += 1;
-                        } else {
-                            ans_lo += 1;
-                        }
-                        queue.push_back((name.clone(), target.to_owned(), emit));
-                    }
-                }
+                Broadcaster => pulse,
             };
+
+            for target in targets {
+                queue.push_back((name, target, pulse));
+            }
         }
     }
 

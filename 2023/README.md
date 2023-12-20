@@ -130,7 +130,7 @@ The next morning my wife told me I woke her up with an exclamation when I'd fina
 
 Woo hoo, points! My part 1 was relatively slow (almost rank 400) but part 2 came in at rank 50. So I uploaded [my solve](https://youtu.be/npoye9L29QA) to YouTube.
 
-In part 1, I hit some lifetime woes which slowed me down. But mostly it was a matter of getting the problem into my head then out into the code. I think as soon as I got the examples working, the real input worked too.
+In part 1, I hit some lifetime woes which slowed me down. (I later cleaned this up. The problem was I wasn't reading the error message.) But mostly it was a matter of getting the problem into my head then out into the code. I think as soon as I got the examples working, the real input worked too.
 
 For part 2, I let brute-force churn for a minute while I thought about how I might optimize. I looked at the input and saw that a `&` conjunction fed into `rx`, so from there it was pretty easy to print out how that `&dg` behaved. I fed the lcm inputs into Wolfram Alpha rather than implement it (which I did immediately after the solve).
 
