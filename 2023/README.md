@@ -126,6 +126,14 @@ But every answer I got was way off. So after much gnashing, I finally resigned t
 
 The next morning my wife told me I woke her up with an exclamation when I'd finally gotten the answer. I also deleted a quarter of the code (everything that I'd written between hour 1 and 3), added a few lines, and the runtime went from minutes to milliseconds. If I hadn't had the anti-cut bug I would've gone to bed much earlier.
 
+# Day 20
+
+Woo hoo, points! My part 1 was relatively slow (almost rank 400) but part 2 came in at rank 50. So I uploaded [my solve](https://youtu.be/npoye9L29QA) to YouTube.
+
+In part 1, I hit some lifetime woes which slowed me down. But mostly it was a matter of getting the problem into my head then out into the code. I think as soon as I got the examples working, the real input worked too.
+
+For part 2, I let brute-force churn for a minute while I thought about how I might optimize. I looked at the input and saw that a `&` conjunction fed into `rx`, so from there it was pretty easy to print out how that `&dg` behaved. I fed the lcm inputs into Wolfram Alpha rather than implement it (which I did immediately after the solve).
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -149,3 +157,4 @@ The next morning my wife told me I woke her up with an exclamation when I'd fina
 | 17  | 00:15:57 | 138     | 01:42:11 | 1885    |
 | 18  | 00:18:26 | 662     | 00:42:02 | 657     |
 | 19  | 00:22:59 | 979     | 02:57:02 | 3454    |
+| 20  | 00:34:04 | 382     | 00:40:10 | **50**  |
