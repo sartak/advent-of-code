@@ -274,7 +274,6 @@ fn main() -> Result<()> {
         }
     }
 
-    println!();
     let mut count = 0;
     'y: for (y, row) in in_loop.iter().enumerate() {
         for (x, enclosed) in row.iter().enumerate() {
@@ -284,18 +283,8 @@ fn main() -> Result<()> {
                 continue 'y;
             } else if matches!(enclosed, Some(true)) {
                 count += 1;
-                print!("\x1b[1;31m");
-            } else if matches!(enclosed, Some(false)) {
-                print!("\x1b[32m");
-            } else if y == sy && x == sx {
-                print!("\x1b[1;33m");
-            } else if seen.contains_key(&(x as i64, y as i64)) {
-                print!("\x1b[34m");
             }
-
-            print!("{}\x1b[m", map[y][x]);
         }
-        println!();
     }
     println!("{count}");
 

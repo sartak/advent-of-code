@@ -125,21 +125,6 @@ fn main() -> Result<()> {
         }
     }
 
-    for (y, row) in map.iter().enumerate() {
-        for (x, _) in row.iter().enumerate() {
-            if let Some(d) = seen.get(&(x as i64, y as i64)) {
-                if *d >= 10 {
-                    print!("*");
-                } else {
-                    print!("{d}");
-                }
-            } else {
-                print!(".");
-            }
-        }
-        println!();
-    }
-
     println!("{max}");
     Ok(())
 }
