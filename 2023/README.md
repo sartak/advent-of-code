@@ -134,6 +134,41 @@ In part 1, I hit some lifetime woes which slowed me down. (I later cleaned this 
 
 For part 2, I let brute-force churn for a minute while I thought about how I might optimize. I looked at the input and saw that a `&` conjunction fed into `rx`, so from there it was pretty easy to print out how that `&dg` behaved. I fed the lcm inputs into Wolfram Alpha rather than implement it (which I did immediately after the solve).
 
+# Day 21
+
+Part 1 was fine enough, just typing out the code really! Two small snags were accidentally checking `x` and `y` instead of `dx` and `dy`, and not shedding previously-seen `(x, y, distance)` entries. But I can't complain at all.
+
+Took me a while to get over the "omg how am I going to do this" shock of part 2. I sort of noticed the checkerboard pattern just from the examples in the problem statement, but once I had debug output in hand I could confirm. I also confirmed that the borders were completely empty, which felt meaningful.
+
+So I started by figuring out how many steps "saturates" a 3x3 tile, being careful to account for parity. For the example it was ~50 steps lights up ~600 `.`s, for my input it was ~650 steps light up ~7500. I figured I could then do some kind of analysis to determine how far ahead of the saturated interior the frontier steps were. But that totally evaded my grasp.
+
+Insert two hours of banging my head against this. Then realized I could take what I've learned so far, open up a spreadsheet, and try finding patterns and charting. Starting with the example outputs, tried to combine them with the ~50 / ~600 numbers I'd found. No dice. Then I realized I'm not bound to the example outputs since I can run for arbitrary. Charting out 50, 52, 54, 56, etc steps wasn't much better either. All the curves I got were a little wonky. But then I tried stepping by 2 _ grid size (to maintain parity), and eureka - the acceleration was constant. The target number of steps doesn't evenly divide by grid size, so I tried stepping by 2 _ grid size modulo 65, which again formed a coherent pattern. So then it was a simple matter of figuring out the polynomial.
+
+![spreadsheet](misc/21.png)
+
+I remembered a technique called "[digital differential analyzer](<https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)>)", which I learned about from [Casey Muratori's circle drawing explanation](https://www.youtube.com/watch?v=JtgQJT08J1g&t=43m05s). Which of course also resembles 2023 day 9. So I ended up with a one-off script that looked like:
+
+```rust
+let target = 26501365;
+let mut steps = 327;
+let mut x1: i64 = 94549;
+let mut x2 = 60450;
+let x3 = 30170;
+let dstep = 131;
+
+while steps < target {
+    steps += dstep;
+    x2 += x3;
+    x1 += x2;
+}
+
+println!("{x}");
+```
+
+This is what algebra looks like at 2:30am.
+
+(TODO: Construct those values from the input.)
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -158,3 +193,4 @@ For part 2, I let brute-force churn for a minute while I thought about how I mig
 | 18  | 00:18:26 | 662     | 00:42:02 | 657     |
 | 19  | 00:22:59 | 979     | 02:57:02 | 3454    |
 | 20  | 00:34:04 | 382     | 00:40:10 | **50**  |
+| 21  | 00:09:59 | 754     | 02:21:32 | 905     |
