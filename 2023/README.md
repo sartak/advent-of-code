@@ -169,6 +169,14 @@ This is what algebra looks like at 2:30am.
 
 (TODO: Construct those values from the input.)
 
+# Day 22
+
+I couldn't do this live, but I did time it as if I were.
+
+In part 1, I initially started modeling the problem with a 3D grid, but I figured that would not scale to whatever part 2 threw at us. So instead I just kept a list of coordinates and manipulated that. I got the falling logic correct off the bat, but I struggled with the disintegration part. The big blocker was I didn't skip irrelevant blocks, so the rest of the logic was compromised.
+
+In part 2 I just tried omitting each brick, then ran the other bricks through the falling logic, counting the distinct number of bricks I saw. I assumed that a naive refactoring of the part 1 logic wouldn't work, given the problem suggests a "chain reaction".
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -194,3 +202,4 @@ This is what algebra looks like at 2:30am.
 | 19  | 00:22:59 | 979     | 02:57:02 | 3454    |
 | 20  | 00:34:04 | 382     | 00:40:10 | **50**  |
 | 21  | 00:09:59 | 754     | 02:21:32 | 905     |
+| 22  | 00:54:48 | N/A     | 01:02:25 | N/A     |
