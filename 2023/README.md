@@ -177,6 +177,38 @@ In part 1, I initially started modeling the problem with a 3D grid, but I figure
 
 In part 2 I just tried omitting each brick, then ran the other bricks through the falling logic, counting the distinct number of bricks I saw. I assumed that a naive refactoring of the part 1 logic wouldn't work, given the problem suggests a "chain reaction".
 
+# Day 23
+
+I also couldn't do this one live.
+
+Part 1 went smoothly. Really need to build an AoC grid library though, since I think this is the fifth problem involving BFS this year. If I had been able to do it live, my solve would have been less than a minute away from getting points. I'm particularly pleased with the slope handling:
+
+```rust
+let ok = match cell {
+    '#' => continue,
+    '.' => true,
+    '^' => dy == -1,
+    '<' => dx == -1,
+    '>' => dx == 1,
+    'v' => dy == 1,
+    _ => panic!(),
+};
+```
+
+For part 2, I let brute force churn while I thought of a better approach. Looking at the input made me realize the branching factor is pretty low: it's mostly unbranching paths connected by relatively few junctions. So my approach was to:
+
+- Collect the list of junction nodes, being a cell having >2 exits, plus the origin and destination.
+- For each junction, walk in each direction until you find another junction. This gives us a new graph `junction -cost-> junction`. By construction there is exactly one path for each (junction, junction) pair, because we stop pathfinding once we see any junction.
+- Finally, run the part 1 algorithm on that new graph.
+
+Implementing this wasn't too bad, but I wasted about 30 minutes (over half my
+p2 solve time) because of one careless bug.
+`x != sx && y != sy && is_node(x, y)` should have been
+`!(x == sx && y == sy) && is_node(x, y)`
+
+This solution still takes about 10 seconds to run, so I'm sure there are even
+better approaches (among other things, I'm sure I could combine steps 1 and 2 into a single BFS).
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -203,3 +235,4 @@ In part 2 I just tried omitting each brick, then ran the other bricks through th
 | 20  | 00:34:04 | 382     | 00:40:10 | **50**  |
 | 21  | 00:09:59 | 754     | 02:21:32 | 905     |
 | 22  | 00:54:48 | N/A     | 01:02:25 | N/A     |
+| 23  | 00:09:51 | N/A     | 01:06:32 | N/A     |
