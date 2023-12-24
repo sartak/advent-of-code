@@ -209,6 +209,10 @@ p2 solve time) because of one careless bug.
 This solution still takes about 10 seconds to run, so I'm sure there are even
 better approaches (among other things, I'm sure I could combine steps 1 and 2 into a single BFS).
 
+# Day 24
+
+Oof. This was the hardest day for me. Both parts were beyond my memory of linear algebra. For part 1 I looked up the intersection formula rather than poorly derive it myself. For part 2 I struggled for a while to even think of how to solve it, and eventually used a Python SAT solver. I'm not proud. But, I'll take this as a opportunity to learn new tools.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -236,3 +240,4 @@ better approaches (among other things, I'm sure I could combine steps 1 and 2 in
 | 21  | 00:09:59 | 754     | 02:21:32 | 905     |
 | 22  | 00:54:48 | N/A     | 01:02:25 | N/A     |
 | 23  | 00:09:51 | N/A     | 01:06:32 | N/A     |
+| 24  | 00:25:53 | 330     | 02:41:40 | 1216    |
