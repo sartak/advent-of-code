@@ -43,7 +43,7 @@ I feel like I could have taken half the time on both parts, but I'm not too fuss
 
 Part 1 went quickly and smoothly. I was particularly happy to recall the iterator [cycle](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.cycle) method.
 
-For part 2, I let the brute force version run in the background while I looked for a better solution. My first approach was to precalculate the distance from each origin to each other node it can reach. Then iterate steps 1..infinity checking if any path length divides cleanly for all origins. Then while implementing that, I realized I'm reinventing least-common-multiple, poorly. I started down the path of finding the LCM of each distinct (origin, destination) path. But then when I debug-printed out the intermediate, results I saw that each origin reached only one destination, which is a vast simplification. I plugged the 6 path lengths into Wolfram Alpha with LCM to get the answer. After submitting I implemented the simplified version of the problem.
+For part 2, I let the brute force version run in the background while I looked for a better solution. My first approach was to precalculate the distance from each origin to each other node it can reach. Then iterate steps 1..infinity checking if any path length divides cleanly for all origins. Then while implementing that, I realized I'm reinventing least-common-multiple, poorly. I started down the path of finding the LCM of each distinct (origin, destination) path. But then when I debug-printed out the intermediate results I saw that each origin reached only one destination, which is a vast simplification. I plugged the 6 path lengths into Wolfram Alpha with LCM to get the answer. After submitting I implemented the simplified version of the problem.
 
 Insert rant here about how I'm feeling punished for solving the general problem statement rather than the specific input set they gave.
 
@@ -65,7 +65,7 @@ Today was another first: building a debug view:
 
 # Day 11
 
-Not too bad on either part. While reading through I was very concerned I'd have to reify an actual graph and run Dijkstra's on it, but no, summing all pairs paths was just `abs(y1 - y0) + abs(x1 - x0)`. I also was happy that storing coordinates in a HashMap was the way to go (with the value being star index to dedupe paths). I was slightly punished for actually reshaping the map in part 1, but sometimes that's just the hand you're dealt. Luckily part 2 was amenable to iterating over all each row and column.
+Not too bad on either part. While reading through I was very concerned I'd have to reify an actual graph and run Dijkstra's on it, but no, summing all pairs paths was just `abs(y1 - y0) + abs(x1 - x0)`. I also was happy that storing coordinates in a HashMap was the way to go (with the value being star index to dedupe paths). I was slightly punished for actually reshaping the map in part 1, but sometimes that's just the hand you're dealt. Luckily part 2 was amenable to iterating over each row and column.
 
 # Day 12
 
@@ -108,7 +108,7 @@ For part 2, I remembered the shoelace formula (to easily find the area of an arb
 
 - an 8 minute, very-ill-considered sorting of the edges by their polar coordinates (give me a break, it was well after my bedtime)
 - getting suspiciously close to, but below, the right answer on the example, which made me quickly realize I need to separately add in the perimeter
-- ending up with an off-by-one error, which a quick `ans += 1` took care of (for both the example and the input!)
+- ending up with an off-by-one error, which a quick `ans += 1` took care of (for both the example and the input!). I later found that this accounts for how the interior and exterior corners contribute to the area.
 
 … I eventually got it to work with an acceptable amount of fuss.
 
@@ -118,13 +118,13 @@ Part 1 went well enough. Really finding new appreciation for how expressive Rust
 
 Part 2 took about three times longer than it should have, ultimately due to a bug in the range splits. I only took the "positive" side; in in a rule like `a{x>100:b,A}` I forgot to cut out the `x>100` from the accepted path, and so it allowed the full range. Whoops. Took hours to spot that bug.
 
-My approach was to enumerate all possible paths through the workflows, shrinking min and max. That left me with a list of possible ranges, each of which can multiply together to form a count of combinations. But, because I way-overcounted due to the bug, it baffled me how to combine them sensibly. It looked like the answer would necessarily just be 4000^4, which it is obviously not. I needed a way to avoid over- or under-counting the possible combinations. I struggled for a while to find the right way to think about this problem. I googled for how to find the union volume of overlapping hypercubes, though didn't end up. The naive approach of iterating over each possible x, m, a, s was intentionally not feasible. But then it dawned on me that I could iterate over _just_ the interesting ranges: the values of x, m, a, and s that appear in any path, sorted and deduplicated. Then check if that set of ranges is valid for any path. This was still a large solution space, about 200^4 \* 500, but just barely brute-forceable. And it made me confident that I wouldn't miscount combinations.
+My approach was to enumerate all possible paths through the workflows, shrinking min and max. That left me with a list of possible ranges, each of which can multiply together to form a count of combinations. But, because I way-overcounted due to the bug, it baffled me how to combine them sensibly. It looked like the answer would necessarily just be 4000^4, which it is obviously not. I needed a way to avoid over- or under-counting the possible combinations. I struggled for a while to find the right way to think about this problem. I googled for how to find the union volume of overlapping hypercubes, though didn't end up pursuing that. The naive approach of iterating over each possible x, m, a, s was intentionally not feasible. But then it dawned on me that I could iterate over _just_ the interesting ranges: the values of x, m, a, and s that appear in any path, sorted and deduplicated. Then check if that set of ranges is valid for any path. This was still a large solution space, about 200^4 \* 500. But, that is just barely brute-forceable. And it made me confident that I wouldn't miscount combinations.
 
-But every answer I got was way off. So after much gnashing, I finally resigned that my bug must be in the range splitting, which I'd until this point felt pretty good about. I did some testing with manually-crafted inputs, which pointed to the "anti-cut" bug. Fixed that up, which gave me results close to, but not exactly, the answer. A few off-by-one fiddling later and I had it. I then ran the and it looked like it was going to take about a half an hour. A couple lines of [rayon](https://docs.rs/rayon/latest/rayon/) later and I got the star after about 6 minutes of brrrr.
+But every answer I got was way off. So after much gnashing, I finally resigned that my bug must be in the range splitting, which I'd until this point felt pretty good about. I did some testing with manually-crafted inputs, which pointed to the "anti-cut" bug. Fixed that up, which gave me results close to, but not exactly, the answer. A few off-by-one fiddling later and I had it. But the real input looked like it was going to take about a half an hour. A couple lines of [rayon](https://docs.rs/rayon/latest/rayon/) later and I got the star after about 6 minutes of brrrr.
 
 ![btop](misc/19.png)
 
-The next morning my wife told me I woke her up with an exclamation when I'd finally gotten the answer. I also deleted a quarter of the code (everything that I'd written between hour 1 and 3), added a few lines, and the runtime went from minutes to milliseconds. If I hadn't had the anti-cut bug I would've gone to bed much earlier.
+The next morning my wife told me I woke her up with an exclamation when I'd finally gotten the answer at 3am. I also deleted a quarter of the code (everything that I'd written between hour 1 and 3), added a few lines, and the runtime went from minutes to milliseconds. If I hadn't had the anti-cut bug I would've gone to bed much earlier.
 
 # Day 20
 
@@ -132,7 +132,7 @@ Woo hoo, points! My part 1 was relatively slow (almost rank 400) but part 2 came
 
 In part 1, I hit some lifetime woes which slowed me down. (I later cleaned this up. The problem was I wasn't reading the error message.) But mostly it was a matter of getting the problem into my head then out into the code. I think as soon as I got the examples working, the real input worked too.
 
-For part 2, I let brute-force churn for a minute while I thought about how I might optimize. I looked at the input and saw that a `&` conjunction fed into `rx`, so from there it was pretty easy to print out how that `&dg` behaved. I fed the lcm inputs into Wolfram Alpha rather than implement it (which I did immediately after the solve).
+For part 2, I let brute-force churn for a minute while I thought about how I might optimize. I looked at the input and saw that a `&` conjunction fed into `rx`, so from there it was pretty easy to print out how that `&dg` behaved. I fed the LCM inputs into Wolfram Alpha rather than implement it (which I did immediately after the solve).
 
 # Day 21
 
@@ -142,7 +142,7 @@ Took me a while to get over the "omg how am I going to do this" shock of part 2.
 
 So I started by figuring out how many steps "saturates" a 3x3 tile, being careful to account for parity. For the example it was ~50 steps lights up ~600 `.`s, for my input it was ~650 steps light up ~7500. I figured I could then do some kind of analysis to determine how far ahead of the saturated interior the frontier steps were. But that totally evaded my grasp.
 
-Insert two hours of banging my head against this. Then realized I could take what I've learned so far, open up a spreadsheet, and try finding patterns and charting. Starting with the example outputs, tried to combine them with the ~50 / ~600 numbers I'd found. No dice. Then I realized I'm not bound to the example outputs since I can run for arbitrary. Charting out 50, 52, 54, 56, etc steps wasn't much better either. All the curves I got were a little wonky. But then I tried stepping by 2 _ grid size (to maintain parity), and eureka - the acceleration was constant. The target number of steps doesn't evenly divide by grid size, so I tried stepping by 2 _ grid size modulo 65, which again formed a coherent pattern. So then it was a simple matter of figuring out the polynomial.
+Insert two hours of banging my head against this. Then realized I could take what I've learned so far, open up a spreadsheet, and try finding patterns and charting. Starting with the example outputs, tried to combine them with the ~50 / ~600 numbers I'd found. No dice. Then I realized I'm not bound to the example outputs since my solution does work for arbitrary (small) inputs. Charting out 50, 52, 54, 56, etc steps wasn't much better either. All the curves I got were a little wonky. But then I tried stepping by 2 \* grid size (to maintain parity), and eureka - the acceleration was constant. The target number of steps doesn't evenly divide by grid size, so I tried stepping by 2 \* grid size modulo 65, which again formed a coherent pattern. So then it was a simple matter of figuring out the polynomial.
 
 ![spreadsheet](misc/21.png)
 
@@ -165,7 +165,7 @@ while steps < target {
 println!("{x}");
 ```
 
-This is what algebra looks like at 2:30am.
+This is what counts for algebra at 2:30am.
 
 (TODO: Construct those values from the input.)
 
