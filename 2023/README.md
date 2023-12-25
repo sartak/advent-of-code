@@ -213,6 +213,16 @@ better approaches (among other things, I'm sure I could combine steps 1 and 2 in
 
 Oof. This was the hardest day for me. Both parts were beyond my memory of linear algebra. For part 1 I looked up the intersection formula rather than poorly derive it myself. For part 2 I struggled for a while to even think of how to solve it, and eventually used a Python SAT solver. I'm not proud. But, I'll take this as a opportunity to learn new tools.
 
+# Day 25
+
+I did fully implement the logic for cutting three wires, coloring the graph via BFS, and seeing if we ended up with exactly two partitions covering all components. Only problem is it was awfully slow (even though I converted components to indexes, rather than using strings).
+
+My solution was a hack, relying on `dot` to just show me which wires to cut: 434-963, 254-256, and 834-88.
+
+![inspecting the graph visually](misc/25.png)
+
+I'm sure the intended solution involves a clever way to maintain _most_ of the graph between trial cuts, but I haven't figured it out yet. I thought about cutting only wires between components with only two edges. But every component has at least 4 wires. Looking forward to seeing how others solved this.
+
 # Results
 
 | Day | #1 Time  | #1 Rank | #2 Time  | #2 Rank |
@@ -241,3 +251,4 @@ Oof. This was the hardest day for me. Both parts were beyond my memory of linear
 | 22  | 00:54:48 | N/A     | 01:02:25 | N/A     |
 | 23  | 00:09:51 | N/A     | 01:06:32 | N/A     |
 | 24  | 00:25:53 | 330     | 02:41:40 | 1216    |
+| 25  | 00:51:48 | 1262    | 00:51:52 | 1088    |
