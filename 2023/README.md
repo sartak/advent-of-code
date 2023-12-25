@@ -59,7 +59,7 @@ In Part 2, it felt like smooth sailing. Add another loop at the end that starts 
 
 Then I saw the squeeze requirement. What a doozy. This took me nearly an hour to implement on its own. I started by cleaning up my solution (e.g. updating the starting cell's pipe type rather than lazily figuring it out, switching from an `Option<Pipe>` representation to just a `Pipe` with `Dot` and `Gap` arms, etc). Then I doubled the size of the map, reconnecting pipes where needed. (I briefly considered doubling the size of the map using vim but I still would have needed to reconnect the pipes, and it wouldn't generalize to the other examples)
 
-I left some todos in both parts where my input didn't require enumerating, say, every single possible starting pipe. But today was another first: building a debug view:
+Today was another first: building a debug view:
 
 ![Debug view](misc/10.png)
 

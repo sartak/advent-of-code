@@ -110,15 +110,15 @@ fn main() -> Result<()> {
         }
 
         ds.sort();
-        if matches!(&ds[..], [(0, 1), (1, 0)]) {
-            omap[sy as usize][sx as usize] = SE;
-        } else if matches!(&ds[..], [(0, -1), (1, 0)]) {
-            omap[sy as usize][sx as usize] = NE;
-        } else if matches!(&ds[..], [(-1, 0), (0, 1)]) {
-            omap[sy as usize][sx as usize] = SW;
-        } else {
-            todo!("{ds:?}");
-        }
+        omap[sy as usize][sx as usize] = match &ds[..] {
+            [(0, 1), (1, 0)] => SE,
+            [(0, -1), (1, 0)] => NE,
+            [(-1, 0), (0, 1)] => SW,
+            [(-1, 0), (0, -1)] => NW,
+            [(0, -1), (0, 1)] => NS,
+            [(-1, 0), (1, 0)] => EW,
+            _ => panic!("{ds:?}"),
+        };
     };
 
     let map = if true {
