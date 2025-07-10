@@ -63,32 +63,54 @@ fn main() -> Result<()> {
     let mut answer = 0;
 
     for (a_x, a_y, b_x, b_y, prize_x, prize_y) in games {
-        let mut min_cost = None;
+        // prize_x = a_x * a_count + b_x * b_count
+        // 0 = a_x * a_count + b_x * b_count - prize_x
+        // -a_x * a_count = b_x * b_count - prize_x
+        // a_count = (b_x * b_count - prize_x) / -a_x
 
-        for a_count in 0..=100 {
-            for b_count in 0..=100 {
-                let x = a_count * a_x + b_count * b_x;
-                let y = a_count * a_y + b_count * b_y;
-                if x > prize_x || y > prize_y {
-                    continue;
-                }
+        // prize_y = a_y * a_count + b_y * b_count
+        // 0 = a_y * a_count + b_y * b_count - prize_y
+        // -b_y * b_count = a_y * a_count - prize_y
+        // b_count = (a_y * a_count - prize_y) / -b_y
 
-                if x == prize_x && y == prize_y {
-                    let cost = a_count * a_cost + b_count * b_cost;
-                    if let Some(c) = min_cost {
-                        if cost < c {
-                            min_cost = Some(cost);
-                        }
-                    } else {
-                        min_cost = Some(cost);
-                    }
-                }
-            }
+        // a_count = (b_x * ((a_y * a_count - prize_y) / -b_y) - prize_x) / -a_x
+        // a_count = (b_x * ((a_y * a_count - prize_y) / -b_y) / -a_x) + prize_x/a_x
+        // a_count = (-b_x/a_x * ((a_y * a_count - prize_y) / -b_y)) + prize_x/a_x
+        // a_count = (-b_x/a_x * (-a_y/b_y * a_count + prize_y/b_y)) + prize_x/a_x
+        // a_count = b_x/a_x * a_y/b_y * a_count - b_x/a_x * prize_y/b_y + prize_x/a_x
+        // -b_x/a_x * a_y/b_y * a_count + a_count = -b_x/a_x * prize_y/b_y + prize_x/a_x
+        // (-b_x/a_x * a_y/b_y + 1) * a_count = -b_x/a_x * prize_y/b_y + prize_x/a_x
+        // a_count = (-b_x/a_x * prize_y/b_y + prize_x/a_x) / (-b_x/a_x * a_y/b_y + 1)
+        // b_count = (a_y * ((-b_x/a_x * prize_y/b_y + prize_x/a_x) / (-b_x/a_x * a_y/b_y + 1)) - prize_y) / -b_y
+
+        let (a_count, b_count) = {
+            let a_x = a_x as f64;
+            let a_y = a_y as f64;
+            let b_x = b_x as f64;
+            let b_y = b_y as f64;
+            let prize_x = prize_x as f64;
+            let prize_y = prize_y as f64;
+
+            let a_count =
+                (-b_x / a_x * prize_y / b_y + prize_x / a_x) / (-b_x / a_x * a_y / b_y + 1.0);
+            let b_count = (a_y
+                * ((-b_x / a_x * prize_y / b_y + prize_x / a_x) / (-b_x / a_x * a_y / b_y + 1.0))
+                - prize_y)
+                / -b_y;
+            (a_count, b_count)
+        };
+
+        let a_count = a_count.round() as i64;
+        let b_count = b_count.round() as i64;
+
+        if a_x * a_count + b_x * b_count != prize_x {
+            continue;
+        }
+        if a_y * a_count + b_y * b_count != prize_y {
+            continue;
         }
 
-        if let Some(cost) = min_cost {
-            answer += cost;
-        }
+        answer += a_cost * a_count + b_cost * b_count;
     }
 
     println!("{answer}");

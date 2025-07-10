@@ -1,23 +1,29 @@
 use anyhow::Result;
 use itertools::Itertools;
+use std::collections::HashMap;
 
-fn possible(towels: &[&str], desired: &str) -> bool {
-    let mut queue = Vec::new();
-    queue.push(desired);
+fn possible<'a>(cache: &mut HashMap<&'a str, bool>, towels: &[&str], desired: &'a str) -> bool {
+    if let Some(&possible) = cache.get(desired) {
+        return possible;
+    }
 
-    while let Some(d) = queue.pop() {
-        if d.is_empty() {
-            return true;
-        }
+    if desired.is_empty() {
+        return true;
+    }
 
-        for &towel in towels {
-            if let Some(r) = d.strip_prefix(towel) {
-                queue.push(r);
+    let mut p = false;
+    for &towel in towels {
+        if let Some(rest) = desired.strip_prefix(towel) {
+            if possible(cache, towels, rest) {
+                p = true;
+                break;
             }
         }
     }
 
-    false
+    cache.insert(desired, p);
+
+    p
 }
 
 fn main() -> Result<()> {
@@ -32,7 +38,8 @@ fn main() -> Result<()> {
 
     let mut answer = 0;
     for desired in lines {
-        if possible(&towels, desired) {
+        let mut cache = HashMap::new();
+        if possible(&mut cache, &towels, desired) {
             answer += 1;
         }
     }

@@ -1,104 +1,147 @@
 use anyhow::Result;
+use itertools::Itertools;
 use std::{
     cmp::Reverse,
-    collections::{BinaryHeap, HashSet},
+    collections::{
+        BinaryHeap, {HashMap, HashSet},
+    },
 };
 
 #[derive(Clone, Copy)]
 enum Cell {
     Wall,
     Empty,
-    Victory,
 }
 use Cell::*;
 
-fn path(
+fn cheats(
     grid: &[Vec<Cell>],
-    sx: usize,
-    sy: usize,
-    cheat: Option<usize>,
-    baseline: Option<usize>,
-) -> Vec<usize> {
-    let mut scores = Vec::new();
+    steps: &[Vec<(Option<usize>, Option<usize>)>],
+    maximum: usize,
+    duration: usize,
+) -> usize {
     let height = grid.len();
     let width = grid[0].len();
+    let mut wins = 0;
 
-    let mut queue = BinaryHeap::new();
-    queue.push((Reverse(0), sx, sy, cheat, 0, None));
-
-    let mut seen = HashSet::new();
-
-    while let Some((score, x, y, cheat, phased, location)) = queue.pop() {
-        let score = score.0;
-
-        if let Some(b) = baseline {
-            if score > b {
-                continue;
+    for (oy, row) in grid.iter().enumerate() {
+        for (ox, cell) in row.iter().enumerate() {
+            match cell {
+                Empty => {}
+                Wall => continue,
             }
-        }
 
-        if !seen.insert((x, y, location)) {
-            continue;
-        }
+            let entry_steps = steps[oy][ox].0.unwrap();
 
-        let cell = grid[y][x];
-        let mut activate = None;
-        match cell {
-            Empty => {}
-            Wall => {
-                if phased > 1 {
-                    // fully phased
-                } else if phased == 1 {
-                    // ending phase but we're in a wall so we crash
-                    continue;
-                } else if cheat.is_some() {
-                    // not phased, but we start phasing now
-                    activate = cheat;
-                } else {
-                    // not phased and we can't, so skip
+            let mut queue = BinaryHeap::new();
+            queue.push((Reverse(0), ox, oy));
+
+            let mut exits = HashMap::new();
+            let mut seen = HashSet::new();
+
+            while let Some((steps, x, y)) = queue.pop() {
+                let steps = steps.0;
+
+                if steps == duration {
                     continue;
                 }
+
+                if !seen.insert((x, y)) {
+                    continue;
+                }
+
+                for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
+                    let x = x as i64 + dx;
+                    let y = y as i64 + dy;
+                    if x < 0 || y < 0 {
+                        continue;
+                    }
+                    let x = x as usize;
+                    let y = y as usize;
+                    if x >= width || y >= height {
+                        continue;
+                    }
+
+                    match grid[y][x] {
+                        Empty => {
+                            exits.entry((x, y)).or_insert(steps + 1);
+                        }
+                        Wall => {}
+                    }
+                    queue.push((Reverse(steps + 1), x, y));
+                }
             }
-            Victory => {
-                scores.push(score);
-                continue;
-            }
-        }
 
-        let ox = x;
-        let oy = y;
-
-        for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
-            let x = x as i64 + dx;
-            let y = y as i64 + dy;
-
-            if x < 0 || y < 0 {
-                continue;
-            }
-
-            let x = x as usize;
-            let y = y as usize;
-
-            if x >= width || y >= height {
-                continue;
-            }
-
-            if let Some(duration) = activate {
-                queue.push((Reverse(score + 1), x, y, None, duration - 1, Some((ox, oy))));
-            } else {
-                queue.push((
-                    Reverse(score + 1),
-                    x,
-                    y,
-                    cheat,
-                    phased.saturating_sub(1),
-                    location,
-                ));
+            for ((ex, ey), cheat_steps) in exits {
+                let exit_steps = steps[ey][ex].1.unwrap();
+                if entry_steps + cheat_steps + exit_steps <= maximum {
+                    wins += 1;
+                }
             }
         }
     }
 
-    scores
+    wins
+}
+
+fn prepare(
+    grid: &[Vec<Cell>],
+    sx: usize,
+    sy: usize,
+    ex: usize,
+    ey: usize,
+) -> Vec<Vec<(Option<usize>, Option<usize>)>> {
+    let mut scored = grid
+        .iter()
+        .map(|row| row.iter().map(|_| (None, None)).collect_vec())
+        .collect_vec();
+
+    for (ox, oy, is_start) in [(sx, sy, true), (ex, ey, false)] {
+        let mut queue = BinaryHeap::new();
+        queue.push((Reverse(0), ox, oy));
+
+        let mut seen = HashSet::new();
+
+        if is_start {
+            scored[oy][ox].0 = Some(0);
+        } else {
+            scored[oy][ox].1 = Some(0);
+        }
+        seen.insert((ox, oy));
+
+        while let Some((steps, x, y)) = queue.pop() {
+            let steps = steps.0 + 1;
+
+            for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
+                let x = x as i16 + dx;
+                let y = y as i16 + dy;
+                if x < 0 || y < 0 {
+                    continue;
+                }
+                let x = x as usize;
+                let y = y as usize;
+
+                if !seen.insert((x, y)) {
+                    continue;
+                }
+
+                match grid[y][x] {
+                    Wall => continue,
+                    Empty => {
+                        if is_start {
+                            scored[y][x].0 = Some(steps);
+                        } else {
+                            scored[y][x].1 = Some(steps);
+                        }
+                    }
+                }
+
+                queue.push((Reverse(steps), x, y));
+            }
+        }
+    }
+
+    scored
 }
 
 fn main() -> Result<()> {
@@ -114,6 +157,8 @@ fn main() -> Result<()> {
 
     let mut sx = 0;
     let mut sy = 0;
+    let mut ex = 0;
+    let mut ey = 0;
     let mut grid = Vec::new();
     for line in input.lines() {
         let mut row = Vec::with_capacity(line.len());
@@ -121,7 +166,11 @@ fn main() -> Result<()> {
             let cell = match c {
                 '.' => Empty,
                 '#' => Wall,
-                'E' => Victory,
+                'E' => {
+                    ex = row.len();
+                    ey = grid.len();
+                    Empty
+                }
                 'S' => {
                     sx = row.len();
                     sy = grid.len();
@@ -134,12 +183,10 @@ fn main() -> Result<()> {
         grid.push(row);
     }
 
-    let baseline = path(&grid, sx, sy, None, None);
-    assert_eq!(baseline.len(), 1);
-    let baseline = baseline[0];
+    let steps = prepare(&grid, sx, sy, ex, ey);
+    let baseline = steps[sy][sx].1.unwrap();
 
-    let answer = path(&grid, sx, sy, Some(2), Some(baseline - threshold)).len();
-
+    let answer = cheats(&grid, &steps, baseline - threshold, 2);
     println!("{answer}");
 
     Ok(())

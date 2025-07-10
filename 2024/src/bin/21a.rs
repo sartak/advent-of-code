@@ -1,10 +1,6 @@
 use anyhow::{Result, bail};
 use itertools::Itertools;
-use std::{
-    cmp::Reverse,
-    collections::{BinaryHeap, HashMap},
-    fmt::Display,
-};
+use std::{collections::HashMap, fmt::Display};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Direction {
@@ -385,100 +381,76 @@ fn all_arrowpad_maneuvers() -> HashMap<(Arrowpad, Arrowpad), Vec<Vec<Direction>>
     maneuvers
 }
 
-fn directions_for_nums(nums: &[Numpad]) -> Vec<Vec<Vec<Direction>>> {
-    let mut queue = BinaryHeap::new();
-    queue.push((Reverse(0), 0, Numpad::Activate, Vec::new()));
-
+fn nums_to_directions(nums: &[Numpad]) -> Vec<Vec<Vec<Direction>>> {
     let maneuvers = all_numpad_maneuvers();
-    let mut best = None;
-
-    while let Some((score, typed, current, path)) = queue.pop() {
-        let score = score.0;
-
-        if let Some((b, _)) = best {
-            if score > b {
-                continue;
-            }
-        }
-
-        if typed == nums.len() {
-            if let Some((b, ref mut paths)) = best {
-                if score < b {
-                    best = Some((score, vec![path]));
-                } else if score == b {
-                    paths.push(path);
-                }
-            } else {
-                best = Some((score, vec![path]));
-            }
-
-            continue;
-        }
-
-        let next = nums[typed];
+    let mut current = Numpad::Activate;
+    let mut segments = Vec::new();
+    for &next in nums {
         let paths = maneuvers.get(&(current, next)).unwrap();
-        for p in paths {
-            let mut path = path.clone();
-            path.push(p.clone());
-            queue.push((Reverse(score + p.len()), typed + 1, next, path));
-        }
+        segments.push(paths.clone());
+        current = next;
     }
-
-    best.unwrap().1
+    segments
 }
 
-fn directions_for_arrows(arrows: &[Arrowpad]) -> Vec<Vec<Vec<Direction>>> {
-    let mut queue = BinaryHeap::new();
-    queue.push((Reverse(0), 0, Arrowpad::Activate, Vec::new()));
-
+fn arrows_to_directions(arrows: &[Arrowpad]) -> Vec<Vec<Vec<Direction>>> {
     let maneuvers = all_arrowpad_maneuvers();
-
-    let mut best = None;
-
-    while let Some((score, typed, current, path)) = queue.pop() {
-        let score = score.0;
-
-        if let Some((b, _)) = best {
-            if score > b {
-                continue;
-            }
-        }
-
-        if typed == arrows.len() {
-            if let Some((b, ref mut paths)) = best {
-                if score < b {
-                    best = Some((score, vec![path]));
-                } else {
-                    paths.push(path);
-                }
-            } else {
-                best = Some((score, vec![path]));
-            }
-
-            continue;
-        }
-
-        let next = arrows[typed];
+    let mut current = Arrowpad::Activate;
+    let mut segments = Vec::new();
+    for &next in arrows {
         let paths = maneuvers.get(&(current, next)).unwrap();
-        for p in paths {
-            let mut path = path.clone();
-            path.push(p.clone());
-            queue.push((Reverse(score + p.len()), typed + 1, next, path));
-        }
+        segments.push(paths.clone());
+        current = next;
     }
-
-    best.unwrap().1
+    segments
 }
 
-fn directions_to_arrows(dirs: &[Vec<Direction>]) -> Vec<Arrowpad> {
-    let mut result = Vec::new();
-    for path in dirs {
-        for key in path {
-            result.push(key.to_arrow());
-        }
-        result.push(Arrowpad::Activate);
+fn directions_to_arrows(dirs: &[Direction]) -> Vec<Arrowpad> {
+    let mut result = Vec::with_capacity(dirs.len() + 1);
+    for key in dirs {
+        result.push(key.to_arrow());
     }
+    result.push(Arrowpad::Activate);
     result
+}
+
+fn score(
+    cache: &mut HashMap<(usize, Vec<Direction>), usize>,
+    segments: &[Vec<Vec<Direction>>],
+    count: usize,
+) -> usize {
+    segments
+        .iter()
+        .map(|segment| {
+            let mut best = None;
+            for path in segment {
+                let key = (count, path.clone());
+                let steps = if let Some(&cached) = cache.get(&key) {
+                    cached
+                } else {
+                    let arrows = directions_to_arrows(path);
+                    let score = if count == 0 {
+                        arrows.len()
+                    } else {
+                        let segments = arrows_to_directions(&arrows);
+                        score(cache, &segments, count - 1)
+                    };
+
+                    cache.insert(key, score);
+                    score
+                };
+
+                if let Some(b) = best {
+                    if steps < b {
+                        best = Some(steps);
+                    }
+                } else {
+                    best = Some(steps);
+                }
+            }
+            best.unwrap()
+        })
+        .sum()
 }
 
 fn main() -> Result<()> {
@@ -488,6 +460,7 @@ fn main() -> Result<()> {
     let input = std::fs::read_to_string("input/21.txt")?;
 
     let mut answer = 0;
+    let mut cache = HashMap::new();
 
     for line in input.lines() {
         let numbers = line
@@ -496,32 +469,11 @@ fn main() -> Result<()> {
             .collect_vec();
         let complexity = Numpad::complexity(&numbers);
 
-        let mut dirs = directions_for_nums(&numbers);
+        let segments = nums_to_directions(&numbers);
+        let score = score(&mut cache, &segments, 2);
 
-        for _ in 0..2 {
-            dirs = dirs
-                .iter()
-                .unique()
-                .map(|d| directions_to_arrows(d))
-                .unique()
-                .flat_map(|a| directions_for_arrows(&a))
-                .collect_vec();
-        }
-
-        let arrows = dirs
-            .iter()
-            .unique()
-            .map(|d| directions_to_arrows(d))
-            .collect_vec();
-
-        let mut shortest = arrows[0].len();
-        for arrow in &arrows {
-            if arrow.len() < shortest {
-                shortest = arrow.len();
-            }
-        }
-        eprintln!("{line}: {shortest} * {complexity}");
-        answer += shortest * complexity;
+        eprintln!("{line}: {score} * {complexity}");
+        answer += score * complexity;
     }
 
     println!("{answer}");
