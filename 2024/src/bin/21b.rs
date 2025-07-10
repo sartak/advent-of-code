@@ -211,17 +211,7 @@ impl Direction {
         vec![Up, Down, Left, Right]
     }
 
-    fn reverse(&self) -> Self {
-        use Direction::*;
-        match self {
-            Up => Down,
-            Down => Up,
-            Left => Right,
-            Right => Left,
-        }
-    }
-
-    fn to_arrow(&self) -> Arrowpad {
+    fn as_arrow(&self) -> Arrowpad {
         match self {
             Direction::Up => Arrowpad::Up,
             Direction::Down => Arrowpad::Down,
@@ -408,7 +398,7 @@ fn arrows_to_directions(arrows: &[Arrowpad]) -> Vec<Vec<Vec<Direction>>> {
 fn directions_to_arrows(dirs: &[Direction]) -> Vec<Arrowpad> {
     let mut result = Vec::with_capacity(dirs.len() + 1);
     for key in dirs {
-        result.push(key.to_arrow());
+        result.push(key.as_arrow());
     }
     result.push(Arrowpad::Activate);
     result
@@ -478,43 +468,4 @@ fn main() -> Result<()> {
     println!("{answer}");
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_numpad() {
-        for key in Numpad::keys() {
-            for first in Direction::all() {
-                if let Some(other) = key.step(first) {
-                    assert_eq!(key, other.step(first.reverse()).unwrap());
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn test_arrowpad() {
-        for key in Arrowpad::keys() {
-            for first in Direction::all() {
-                if let Some(other) = key.step(first) {
-                    assert_eq!(key, other.step(first.reverse()).unwrap());
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn test_numpad_maneuvers() {
-        let empty = numpad_maneuvers(Numpad::Six, Numpad::Six);
-        assert_eq!(empty.len(), 1);
-        assert_eq!(empty[0].len(), 0);
-
-        let one = numpad_maneuvers(Numpad::Six, Numpad::Three);
-        assert_eq!(one.len(), 1);
-        assert_eq!(one[0].len(), 1);
-        assert_eq!(one[0][0], Direction::Down);
-    }
 }

@@ -70,11 +70,6 @@ fn main() -> Result<()> {
     #[cfg(not(debug_assertions))]
     let size = 70 + 1;
 
-    #[cfg(debug_assertions)]
-    let corrupts = 12;
-    #[cfg(not(debug_assertions))]
-    let corrupts = 1024;
-
     let lines = input
         .lines()
         .map(|line| {

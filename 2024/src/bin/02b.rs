@@ -27,9 +27,11 @@ fn main() -> Result<()> {
                 .tuple_windows()
             {
                 if let Some(increasing) = increasing {
-                    if increasing && next < this {
-                        safe = false;
-                    } else if !increasing && this < next {
+                    if increasing {
+                        if next < this {
+                            safe = false;
+                        }
+                    } else if this < next {
                         safe = false;
                     }
                 } else {
