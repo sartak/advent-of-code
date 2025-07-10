@@ -12,6 +12,7 @@ enum Operation {
 use Operation::*;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 enum Wire<'a> {
     Constant(bool),
     Calculated(bool),
@@ -19,90 +20,11 @@ enum Wire<'a> {
 }
 use Wire::*;
 
-fn inject<'a>(wires: &mut HashMap<&'a str, Wire<'a>>, is_x: bool, value: u64) {
-    for (&name, wire) in wires.iter_mut() {
-        let index = if is_x {
-            let Some(i) = name.strip_prefix('x') else {
-                continue;
-            };
-            i
-        } else {
-            let Some(i) = name.strip_prefix('y') else {
-                continue;
-            };
-            i
-        };
-
-        let index: u64 = index.parse().unwrap();
-        let value = (value >> index) & 1 == 1;
-        *wire = Calculated(value);
-    }
-}
-
 fn swap_wires<'a>(wires: &mut HashMap<&'a str, Wire<'a>>, a: &'a str, b: &'a str) {
     let wire_a = wires.remove(a).unwrap();
     let wire_b = wires.remove(b).unwrap();
     wires.insert(a, wire_b);
     wires.insert(b, wire_a);
-}
-
-fn simulation<'a>(mut wires: HashMap<&'a str, Wire<'a>>, zwires: &[&str]) -> Option<u64> {
-    'resolve: loop {
-        let mut calculated = Vec::new();
-
-        for &name in wires.keys() {
-            let wire = wires.get(name).unwrap();
-            let Gate(left, op, right) = wire else {
-                continue;
-            };
-
-            let left = wires.get(left).unwrap();
-            let right = wires.get(right).unwrap();
-
-            let (left, right) = match (left, right) {
-                (Gate(_, _, _), _) => continue,
-                (_, Gate(_, _, _)) => continue,
-                (Constant(l) | Calculated(l), Constant(r) | Calculated(r)) => (*l, *r),
-            };
-
-            let value = match op {
-                And => left && right,
-                Or => left || right,
-                Xor => left != right,
-            };
-
-            calculated.push((name, Calculated(value)));
-        }
-
-        if calculated.is_empty() {
-            return None;
-        }
-
-        let mut check = false;
-        for (name, wire) in calculated {
-            wires.insert(name, wire);
-            if name.starts_with('z') {
-                check = true;
-            }
-        }
-
-        if check {
-            let mut answer = 0;
-            for &name in zwires {
-                let wire = wires.get(name).unwrap();
-                let value = match wire {
-                    Calculated(v) => *v,
-                    Constant(v) => *v,
-                    Gate(_, _, _) => continue 'resolve,
-                };
-
-                answer <<= 1;
-                answer |= if value { 1 } else { 0 };
-            }
-
-            return Some(answer);
-        }
-    }
 }
 
 fn check_xy_xor<'a>(name: &str, wire: &Wire<'a>) -> Result<()> {
@@ -311,59 +233,24 @@ fn main() -> Result<()> {
         panic!("Unhandled input line: {line}");
     }
 
-    let zwires = wires
-        .keys()
-        .filter(|name| name.starts_with('z'))
-        .copied()
-        .sorted()
-        .rev()
-        .collect_vec();
-
-    let max = (1 << (zwires.len() - 1)) - 1;
-
-    swap_wires(&mut wires, "z12", "vdc");
-    swap_wires(&mut wires, "z21", "nhn");
-    swap_wires(&mut wires, "tvb", "khg");
-    swap_wires(&mut wires, "z33", "gst");
+    let swaps = [
+        ("z12", "vdc"),
+        ("z21", "nhn"),
+        ("tvb", "khg"),
+        ("z33", "gst"),
+    ];
+    for (a, b) in swaps {
+        swap_wires(&mut wires, a, b);
+    }
 
     for z in 2..45 {
         check_z(&wires, z)?;
     }
 
-    println!("digraph {{");
-    for (name, wire) in &wires {
-        if name.starts_with('x') {
-            println!("{name} [group=x] [color=purple]");
-        } else if name.starts_with('y') {
-            println!("{name} [group=y] [color=green]");
-        } else if name.starts_with('z') {
-            println!("{name} [group=z] [color=blue]");
-        }
-
-        match wire {
-            Calculated(_) | Constant(_) => {}
-            Gate(left, op, right) => {
-                println!("{left} -> {name} [label={op:?}]");
-                println!("{right} -> {name} [label={op:?}]");
-            }
-        }
-    }
-    println!("}}");
-
-    for x in 0..=max {
-        for y in 0..=max {
-            let mut wires = wires.clone();
-            inject(&mut wires, true, x);
-            inject(&mut wires, false, y);
-
-            let answer = simulation(wires, &zwires);
-            match answer {
-                None => bail!("unable to solve for x={x}, y={y}"),
-                Some(z) if z == x + y => {}
-                Some(got) => bail!("expected {x}+{y}={}, got {got}", x + y),
-            }
-        }
-    }
+    println!(
+        "{}",
+        swaps.iter().flat_map(|(a, b)| [a, b]).sorted().join(",")
+    );
 
     Ok(())
 }
