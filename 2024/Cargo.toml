@@ -3,6 +3,23 @@ name = "aoc2024"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+strip = "symbols"
+panic = "abort"
+lto = "fat"
+codegen-units = 1
+
+[profile.dev]
+strip = "debuginfo"
+lto = "off"
+debug = 0
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev.package.aoc2024]
+opt-level = 0
+
 [dependencies]
 anyhow = "1.0.98"
 itertools = "0.14.0"
