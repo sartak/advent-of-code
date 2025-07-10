@@ -472,7 +472,6 @@ fn main() -> Result<()> {
         let segments = nums_to_directions(&numbers);
         let score = score(&mut cache, &segments, 2);
 
-        eprintln!("{line}: {score} * {complexity}");
         answer += score * complexity;
     }
 
