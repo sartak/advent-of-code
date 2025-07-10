@@ -145,15 +145,13 @@ fn prepare(
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/20-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/20.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/20-example.txt"
+    } else {
+        "input/20.txt"
+    })?;
 
-    #[cfg(debug_assertions)]
-    let threshold = 50;
-    #[cfg(not(debug_assertions))]
-    let threshold = 100;
+    let threshold = if cfg!(debug_assertions) { 50 } else { 100 };
 
     let mut sx = 0;
     let mut sy = 0;

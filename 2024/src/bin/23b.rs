@@ -3,10 +3,11 @@ use itertools::Itertools;
 use std::collections::HashMap;
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/23-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/23.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/23-example.txt"
+    } else {
+        "input/23.txt"
+    })?;
 
     let mut cx: HashMap<&str, Vec<&str>> = HashMap::new();
 

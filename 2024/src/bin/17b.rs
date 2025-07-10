@@ -91,10 +91,11 @@ fn quine(mut a: u64, mut b: u64, mut c: u64, program: &[u64]) -> Vec<u64> {
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/17-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/17.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/17-example.txt"
+    } else {
+        "input/17.txt"
+    })?;
 
     let mut b: u64 = 0;
     let mut c: u64 = 0;

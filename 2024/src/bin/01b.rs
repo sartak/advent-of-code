@@ -2,10 +2,11 @@ use anyhow::Result;
 use std::collections::HashMap;
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/01-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/01.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/01-example.txt"
+    } else {
+        "input/01.txt"
+    })?;
 
     let mut left = Vec::new();
     let mut right = HashMap::new();

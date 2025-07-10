@@ -126,10 +126,11 @@ fn path(grid: &[Vec<Cell>], sx: usize, sy: usize, sd: Direction) -> usize {
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/16-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/16.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/16-example.txt"
+    } else {
+        "input/16.txt"
+    })?;
 
     let mut grid = Vec::new();
     let mut sx = 0;

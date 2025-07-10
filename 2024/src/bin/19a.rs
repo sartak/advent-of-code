@@ -27,10 +27,11 @@ fn possible<'a>(cache: &mut HashMap<&'a str, bool>, towels: &[&str], desired: &'
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/19-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/19.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/19-example.txt"
+    } else {
+        "input/19.txt"
+    })?;
 
     let mut lines = input.lines();
     let towels = lines.next().unwrap().split(", ").collect_vec();

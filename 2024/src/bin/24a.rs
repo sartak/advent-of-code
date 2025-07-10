@@ -20,10 +20,11 @@ enum Wire<'a> {
 use Wire::*;
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/24-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/24.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/24-example.txt"
+    } else {
+        "input/24.txt"
+    })?;
 
     let const_rx = Regex::new(r"^(\w+): (0|1)$").unwrap();
     let gate_rx = Regex::new(r"^(\w+) (AND|OR|XOR) (\w+) -> (\w+)$").unwrap();

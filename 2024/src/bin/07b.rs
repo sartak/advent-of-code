@@ -3,10 +3,11 @@ use itertools::Itertools;
 use std::collections::VecDeque;
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/07-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/07.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/07-example.txt"
+    } else {
+        "input/07.txt"
+    })?;
 
     let mut answer = 0;
 

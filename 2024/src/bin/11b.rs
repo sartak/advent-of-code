@@ -31,10 +31,11 @@ fn process(cache: &mut HashMap<(u64, usize), u64>, stone: u64, blinks: usize) ->
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/11-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/11.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/11-example.txt"
+    } else {
+        "input/11.txt"
+    })?;
 
     let stones = input
         .lines()

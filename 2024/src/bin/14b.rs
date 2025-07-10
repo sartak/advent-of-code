@@ -11,15 +11,17 @@ struct Robot {
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/14-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/14.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/14-example.txt"
+    } else {
+        "input/14.txt"
+    })?;
 
-    #[cfg(debug_assertions)]
-    let (width, height) = (11, 7);
-    #[cfg(not(debug_assertions))]
-    let (width, height) = (101, 103);
+    let (width, height) = if cfg!(debug_assertions) {
+        (11, 7)
+    } else {
+        (101, 103)
+    };
 
     let meridian = width >> 1;
     let equator = height >> 1;

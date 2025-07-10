@@ -444,10 +444,11 @@ fn score(
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/21-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/21.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/21-example.txt"
+    } else {
+        "input/21.txt"
+    })?;
 
     let mut answer = 0;
     let mut cache = HashMap::new();

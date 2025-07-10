@@ -60,20 +60,19 @@ fn path(grid: &[Vec<Cell>], sx: usize, sy: usize, ex: usize, ey: usize) -> Optio
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/18-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/18.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/18-example.txt"
+    } else {
+        "input/18.txt"
+    })?;
 
-    #[cfg(debug_assertions)]
-    let size = 6 + 1;
-    #[cfg(not(debug_assertions))]
-    let size = 70 + 1;
+    let size = if cfg!(debug_assertions) {
+        6 + 1
+    } else {
+        70 + 1
+    };
 
-    #[cfg(debug_assertions)]
-    let corrupts = 12;
-    #[cfg(not(debug_assertions))]
-    let corrupts = 1024;
+    let corrupts = if cfg!(debug_assertions) { 12 } else { 1024 };
 
     let mut grid = (0..size)
         .map(|_| (0..size).map(|_| Cell::Empty).collect_vec())

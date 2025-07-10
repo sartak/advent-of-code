@@ -38,10 +38,11 @@ fn rate(trail: &[Vec<u32>], x: usize, y: usize) -> usize {
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/10-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/10.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/10-example.txt"
+    } else {
+        "input/10.txt"
+    })?;
 
     let trail = input
         .lines()

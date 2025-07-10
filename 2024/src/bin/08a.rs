@@ -3,10 +3,11 @@ use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/08-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/08.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/08-example.txt"
+    } else {
+        "input/08.txt"
+    })?;
 
     let mut antennae: HashMap<char, Vec<(i64, i64)>> = HashMap::new();
 

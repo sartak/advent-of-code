@@ -64,10 +64,11 @@ impl Cell {
 }
 
 fn main() -> Result<()> {
-    #[cfg(debug_assertions)]
-    let input = std::fs::read_to_string("input/06-example.txt")?;
-    #[cfg(not(debug_assertions))]
-    let input = std::fs::read_to_string("input/06.txt")?;
+    let input = std::fs::read_to_string(if cfg!(debug_assertions) {
+        "input/06-example.txt"
+    } else {
+        "input/06.txt"
+    })?;
 
     let mut px = 0;
     let mut py = 0;
