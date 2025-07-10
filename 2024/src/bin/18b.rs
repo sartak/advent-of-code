@@ -4,6 +4,7 @@ use std::{
     collections::{BinaryHeap, HashSet},
 };
 
+#[derive(Clone, Copy)]
 enum Cell {
     Wall,
     Empty,
@@ -80,19 +81,29 @@ fn main() -> Result<()> {
         })
         .collect_vec();
 
-    let mut grid = (0..size)
+    let empty = (0..size)
         .map(|_| (0..size).map(|_| Cell::Empty).collect_vec())
         .collect_vec();
 
-    for (x, y) in lines {
-        grid[y][x] = Wall;
+    let mut min = 0;
+    let mut max = lines.len();
 
+    while min < max {
+        let step = (min + max) / 2;
+
+        let mut grid = empty.clone();
+        for (x, y) in &lines[..step] {
+            grid[*y][*x] = Wall;
+        }
         let score = path(&grid, 0, 0, size - 1, size - 1);
-        if score.is_none() {
-            println!("{x},{y}");
-            break;
+        if score.is_some() {
+            min = step + 1;
+        } else {
+            max = step;
         }
     }
 
+    let (x, y) = lines[max - 1];
+    println!("{x},{y}");
     Ok(())
 }
